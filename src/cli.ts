@@ -53,6 +53,7 @@ price 选项:
   --cookie "<Cookie>"         国服：登录 Cookie 即可（浏览器登录 poe.game.qq.com/trade 后 F12 复制）
   --refresh-token <token>     （可选）国服 OAuth 刷新令牌（localStorage __POEREFRESH），自动换 access token
   --dpop-token <token>        （可选）国服 access token（localStorage __POESESSION）
+  --crafted                   把工艺词缀纳入匹配（默认不查：市集上大多没有同样的工艺，查了几乎搜不到）
   （国际服固定只查"立即购买"（securable）挂牌；国服查全部）
   --no-cache                  禁用磁盘缓存
 `;
@@ -164,6 +165,7 @@ async function cmdPrice(input: string, values: Record<string, unknown>): Promise
     // 国际服固定 sale_type=securable（立即购买）；国服不传（sale_type 会致 0）
     saleType: realm.id === "cn" ? undefined : "securable",
     maxMods: 8,
+    includeCrafted: values.crafted === true,
   });
   const delayMs = Number(values.delay ?? 2000);
   const rateWaitMs = Number(values["rate-wait"] ?? 30000);
@@ -276,6 +278,7 @@ async function cmdBatch(input: string, values: Record<string, unknown>): Promise
     deviationPct: deviation,
     limit,
     maxMods,
+    includeCrafted: values.crafted === true,
     includeGems,
     realm: realm.id,
     host: realm.host,
@@ -385,6 +388,7 @@ async function main(): Promise<void> {
       "dpop-token": { type: "string" },
       "no-cache": { type: "boolean", default: false },
       "max-mods": { type: "string" },
+      crafted: { type: "boolean", default: false },
       "no-gems": { type: "boolean", default: false },
       csv: { type: "string" },
       progress: { type: "boolean", default: false },

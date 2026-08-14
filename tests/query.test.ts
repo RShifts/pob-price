@@ -38,7 +38,7 @@ Item Level: 71`);
     assert.equal(q.sort.price, "asc");
   });
 
-  it("稀有装 loose：explicit + craft 词缀，数值取 min", () => {
+  it("稀有装 loose：explicit 词缀数值取 min；工艺词缀默认不纳入", () => {
     const item = parseItemText(ring);
     const q = buildSearchQuery(item, statMap, {});
     const query = q.query as Record<string, any>;
@@ -47,9 +47,17 @@ Item Level: 71`);
     const and = query.stats[0].filters;
     const ids = and.map((f: any) => f.id);
     assert.ok(ids.includes("explicit.stat_mana"), "应包含 mana 词缀");
-    assert.ok(ids.includes("craft.stat_life"), "应包含 crafted 词缀");
+    assert.ok(!ids.includes("craft.stat_life"), "工艺词缀默认不纳入过滤");
     const mana = and.find((f: any) => f.id === "explicit.stat_mana");
     assert.deepEqual(mana.value, { min: 31 });
+  });
+
+  it("includeCrafted=true 时工艺词缀纳入过滤", () => {
+    const item = parseItemText(ring);
+    const q = buildSearchQuery(item, statMap, { includeCrafted: true });
+    const query = q.query as Record<string, any>;
+    const ids = query.stats[0].filters.map((f: any) => f.id);
+    assert.ok(ids.includes("craft.stat_life"), "开启 includeCrafted 后应包含工艺词缀");
   });
 
   it("稀有装：偏差百分比放宽 min 值", () => {

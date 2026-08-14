@@ -3,6 +3,8 @@ import { StatMap, extractValues } from "./stats.js";
 
 export interface QueryOptions {
   maxPrice?: number;
+  /** 是否把工艺词缀（crafted）纳入词缀过滤。默认 false：市集上大多没有同样的工艺，带入会几乎搜不到 */
+  includeCrafted?: boolean;
   /** 词缀数量上限（默认 8，防止查询过大） */
   maxMods?: number;
   /** 交易类型（如 auto_buyout=交易一口价/立即购买） */
@@ -59,7 +61,7 @@ function statFilter(
  * 把解析出的物品 → 官方市集查询 JSON。
  *
  * - 唯一装：name + type 过滤（不搜词缀）
- * - 稀有/魔法：type + rarity + 词缀过滤（显性+工艺+裂痕，min 值按偏差百分比放宽）
+ * - 稀有/魔法：type + rarity + 词缀过滤（显性+裂痕+可选工艺，min 值按偏差百分比放宽；工艺词缀默认不查）
  */
 export function buildSearchQuery(item: ParsedItem, statMap: StatMap, opts: QueryOptions = {}): TradeQuery {
   const maxMods = opts.maxMods ?? 8;
@@ -92,7 +94,7 @@ export function buildSearchQuery(item: ParsedItem, statMap: StatMap, opts: Query
       for (const modText of mods) candidates.push({ modText, prefer, score: scoreModText(modText) });
     };
     add(item.explicitMods, "explicit");
-    add(item.craftMods, "crafted");
+    if (opts.includeCrafted) add(item.craftMods, "crafted");
     add(item.fracturedMods, "fractured");
     candidates.sort((a, b) => b.score - a.score);
 
