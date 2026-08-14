@@ -92,10 +92,9 @@
       <input type="number" id="limit" value="3" min="1" max="10" style="width:70px">
       <label for="delay">请求间隔（ms，防限流）</label>
       <input type="number" id="delay" value="3000" min="1000" step="500" style="width:90px">
-      <label for="craftedMode" title="工艺词缀处理方式：默认忽略；空位=搜还有空位可自己上工艺的装备；匹配=按工艺文本精确匹配">工艺词缀</label>
+      <label for="craftedMode" title="工艺词缀处理方式：默认忽略；匹配=按工艺文本精确匹配（市集上大多没有同样的工艺，匹配很严）">工艺词缀</label>
       <select id="craftedMode" style="width:auto">
-        <option value="none">忽略</option>
-        <option value="empty" selected>空1前缀/后缀</option>
+        <option value="none" selected>忽略</option>
         <option value="match">文本匹配</option>
       </select>
     </div>

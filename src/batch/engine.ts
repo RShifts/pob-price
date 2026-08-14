@@ -31,8 +31,8 @@ export interface BatchOptions {
   saleType?: string;
   /** 词缀过滤上限 */
   maxMods: number;
-  /** 工艺词缀处理："none" 默认忽略 / "empty" 要求空1前缀或后缀 / "match" 按文本匹配 */
-  craftedMode?: "none" | "empty" | "match";
+  /** 工艺词缀处理："none" 默认忽略 / "match" 按文本匹配 */
+  craftedMode?: "none" | "match";
   /** 是否给技能宝石查价 */
   includeGems: boolean;
   /** 进度回调（已处理数, 总数, 标签） */

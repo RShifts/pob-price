@@ -54,7 +54,6 @@ price 选项:
   --refresh-token <token>     （可选）国服 OAuth 刷新令牌（localStorage __POEREFRESH），自动换 access token
   --dpop-token <token>        （可选）国服 access token（localStorage __POESESSION）
   --crafted                   按文本匹配工艺词缀（默认不查：市集上大多没有同样的工艺）
-  --crafted-empty             工艺词缀不匹配文本，但要求空 1 前缀/后缀（搜还有空位、可自己上工艺的）
   （国际服固定只查"立即购买"（securable）挂牌；国服查全部）
   --no-cache                  禁用磁盘缓存
 `;
@@ -166,7 +165,7 @@ async function cmdPrice(input: string, values: Record<string, unknown>): Promise
     // 国际服固定 sale_type=securable（立即购买）；国服不传（sale_type 会致 0）
     saleType: realm.id === "cn" ? undefined : "securable",
     maxMods: 8,
-    craftedMode: values["crafted-empty"] === true ? "empty" : (values.crafted === true ? "match" : "none"),
+    craftedMode: values.crafted === true ? "match" : "none",
   });
   const delayMs = Number(values.delay ?? 2000);
   const rateWaitMs = Number(values["rate-wait"] ?? 30000);
@@ -279,7 +278,7 @@ async function cmdBatch(input: string, values: Record<string, unknown>): Promise
     deviationPct: deviation,
     limit,
     maxMods,
-    craftedMode: values["crafted-empty"] === true ? "empty" : (values.crafted === true ? "match" : "none"),
+    craftedMode: values.crafted === true ? "match" : "none",
     includeGems,
     realm: realm.id,
     host: realm.host,
@@ -390,7 +389,6 @@ async function main(): Promise<void> {
       "no-cache": { type: "boolean", default: false },
       "max-mods": { type: "string" },
       crafted: { type: "boolean", default: false },
-      "crafted-empty": { type: "boolean", default: false },
       "no-gems": { type: "boolean", default: false },
       csv: { type: "string" },
       progress: { type: "boolean", default: false },

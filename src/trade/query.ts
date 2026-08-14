@@ -1,17 +1,10 @@
 import type { ParsedItem } from "../item/types.js";
 import { StatMap, extractValues } from "./stats.js";
-import { emptyModsFromCrafts, applyEmptyMods } from "./craft-empty.js";
 
 export interface QueryOptions {
   maxPrice?: number;
-  /**
-   * 工艺词缀处理方式（默认 "none"）：
-   * - "none"  完全不理会工艺词缀（默认）
-   * - "empty" 不匹配工艺文本，但按工艺词缀前后缀要求「空 1 前缀/空 1 后缀」，
-   *           即搜还有空位、可以自己上工艺的装备
-   * - "match" 按文本匹配工艺词缀（市集上大多没有同样的工艺，匹配很严）
-   */
-  craftedMode?: "none" | "empty" | "match";
+  /** 工艺词缀处理方式（默认 "none"）："none" 忽略 / "match" 按文本匹配工艺词缀 */
+  craftedMode?: "none" | "match";
   /** 词缀数量上限（默认 8，防止查询过大） */
   maxMods?: number;
   /** 交易类型（如 auto_buyout=交易一口价/立即购买） */
@@ -114,12 +107,6 @@ export function buildSearchQuery(item: ParsedItem, statMap: StatMap, opts: Query
       if (f) and.push(f);
     }
     if (and.length > 0) query.stats = [{ type: "and", filters: and }];
-  }
-
-  // 工艺词缀 → 空位过滤：不匹配文本，但要求空 1 前缀/空 1 后缀（可自己上工艺）
-  if (opts.craftedMode === "empty") {
-    const empty = emptyModsFromCrafts(item.craftMods);
-    if (empty.emptyPrefix || empty.emptySuffix) applyEmptyMods(query, empty);
   }
 
   return { query, sort: { price: "asc" } };
