@@ -325,9 +325,10 @@ function renderPrice(server, rows, summary) {
     const tr = document.createElement("tr");
     if (r.error) tr.className = "err";
     const retry = (r.error && r.kind === "item" && r.ids && r.ids.length)
-      ? ` <button class="small secondary" onclick="retryItem('${server}', '${r.ids[0]}', '${escKey(r.key)}')">重试</button>`
+      ? ` <button class="small secondary retry-btn" data-server="${server}" data-id="${esc(r.ids[0])}">重试</button>`
       : "";
-    tr.innerHTML = `<td>${bi(r.nameCn, r.name)}${r.gemLevel != null ? ' <span class="badge">lv' + r.gemLevel + '</span>' : ""}${r.count > 1 ? " ×" + r.count : ""}${retry}</td>
+    const statBadge = r.statCount ? ' <span class="badge">词缀' + r.statCount + "</span>" : "";
+    tr.innerHTML = `<td>${bi(r.nameCn, r.name)}${r.gemLevel != null ? ' <span class="badge">lv' + r.gemLevel + '</span>' : ""}${statBadge}${r.count > 1 ? " ×" + r.count : ""}${retry}</td>`,
       <td class="num">${fmt(r.minChaos)}</td><td class="num">${fmt(r.medianChaos)}</td><td class="num">${fmt(r.avgChaos)}</td>
       <td class="num">${r.sampleCount}</td><td class="num">${r.total}</td>
       <td>${r.url ? '<a href="' + esc(r.url) + '" target="_blank">市集</a>' : (r.error ? esc(r.error.slice(0, 30)) : "")}</td>`;
@@ -365,8 +366,6 @@ async function retryItem(server, itemId) {
   }
 }
 
-function escKey(s) { return String(s).replace(/'/g, "\\'").replace(/"/g, "&quot;"); }
-
 // 双语显示：中文主显，英文小字辅助
 function bi(cn, en) {
   if (!cn || cn === en) return esc(en);
@@ -392,6 +391,12 @@ async function loadLeagues() {
 }
 loadCachedCookie();
 loadLeagues();
+
+// 重试按钮：事件委托（避免行内 onclick 的引号/换行转义问题）
+document.addEventListener("click", (ev) => {
+  const btn = ev.target.closest(".retry-btn");
+  if (btn) retryItem(btn.dataset.server, btn.dataset.id);
+});
 </script>
 </body>
 </html>

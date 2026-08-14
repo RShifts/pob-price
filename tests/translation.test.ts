@@ -13,6 +13,12 @@ describe("translateToCn", () => {
     assert.equal(translateToCn("Watcher's Eye"), "守望之眼");
   });
 
+  it("辅助宝石：表内为 X Support → X(辅)，裸名回退匹配", () => {
+    assert.equal(translateToCn("Enlighten Support"), "启蒙(辅)");
+    assert.equal(translateToCn("Enlighten"), "启蒙(辅)");
+    assert.equal(translateToCn("Added Cold Damage Support"), "附加冰霜伤害(辅)");
+  });
+
   it("查不到返回原值", () => {
     assert.equal(translateToCn("完全未知的物品名XYZ"), "完全未知的物品名XYZ");
     assert.equal(translateToCn(""), "");

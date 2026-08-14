@@ -56,6 +56,8 @@ export interface BatchItemResult {
   name: string;
   /** 中文名（UI 展示用，由服务端附加） */
   nameCn?: string;
+  /** 查询中使用的词缀过滤数（UI 展示"词缀N"） */
+  statCount?: number;
   baseType?: string;
   rarity?: string;
   ilvl?: number;
@@ -154,10 +156,12 @@ export class BatchPriceEngine {
       // 国服：status 必须 any（online 会静默返回 0）；sale_type 会致 0，不传
       const query = buildSearchQuery(parsed, statMap, { deviationPct: opts.deviationPct, online: opts.online, maxMods: opts.maxMods, statusAny: opts.realm === "cn" });
       const search = await this.client.search(opts.league, query);
+      const statCount = ((query.query as Record<string, unknown>).stats as { filters?: unknown[] }[] | undefined)?.[0]?.filters?.length ?? 0;
       const result: BatchItemResult = {
         kind: "item",
         key: parsed.uniqueId ?? entry.slot.rawText,
         ids: [entry.slot.id],
+        statCount,
         category: categorizeItem(parsed),
         name: parsed.name ?? parsed.baseType ?? "(未命名)",
         baseType: parsed.baseType,

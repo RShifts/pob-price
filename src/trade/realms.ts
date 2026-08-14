@@ -21,7 +21,14 @@ export function realmOf(id: string): RealmConfig {
 
 /** 英文名 → 中文名（国服市集名称）；查不到返回原值。 */
 export function translateToCn(name: string): string {
-  return EN_CN_NAMES[name] ?? EN_CN_NAMES[name.trim()] ?? name;
+  const t = name.trim();
+  if (EN_CN_NAMES[t]) return EN_CN_NAMES[t];
+  // 辅助宝石：表里是 "X Support" → "X(辅)"，展示名 "X" 时补后缀匹配
+  if (t.endsWith(" Support") && EN_CN_NAMES[t.slice(0, -" Support".length)]) {
+    return EN_CN_NAMES[t.slice(0, -" Support".length)];
+  }
+  if (EN_CN_NAMES[t + " Support"]) return EN_CN_NAMES[t + " Support"];
+  return name;
 }
 
 /** 物品本地化：国服查询前把 name/baseType 翻译成中文（stat 词缀 id 跨服通用，无需翻译）。 */
