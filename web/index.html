@@ -112,7 +112,7 @@
     <h3 style="margin:0 0 8px">装备列表 <span id="itemCount" class="badge"></span></h3>
     <div class="table-scroll">
       <table id="itemsTable">
-        <thead><tr><th></th><th>名称</th><th>基底</th><th>稀有度</th><th>类别</th><th>ILv</th><th>孔</th><th>腐化</th><th>详情</th></tr></thead>
+        <thead><tr><th><input type="checkbox" id="checkAll" title="全选/全不选" checked></th><th>名称</th><th>基底</th><th>稀有度</th><th>类别</th><th>ILv</th><th>孔</th><th>腐化</th><th>详情</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -208,12 +208,23 @@ function renderItems(data) {
   $("itemsPanel").style.display = "block";
   $("priceIntlBtn").disabled = false;
   $("priceCnBtn").disabled = false;
+  syncCheckAll();
   $("itemCount").textContent = data.items.length + " 件";
   $("parseInfo").textContent = `${data.info.className ?? "?"} ${data.info.ascendClassName ?? ""} Lv.${data.info.level ?? "?"} | 宝石 ${data.gems.length} 颗 | 天赋节点 ${data.tree?.nodeCount ?? 0} | 来源 ${data.source}`;
 }
 
 function toggleAll(on) {
   document.querySelectorAll(".item-check").forEach(cb => cb.checked = on);
+  syncCheckAll();
+}
+// 表头全选：点击切换所有行，行勾选变化时反向同步表头
+function syncCheckAll() {
+  const all = document.querySelectorAll(".item-check");
+  const ca = $("checkAll");
+  if (!ca || !all.length) return;
+  const checked = [...all].filter(cb => cb.checked).length;
+  ca.checked = all.length > 0 && checked === all.length;
+  ca.indeterminate = checked > 0 && checked < all.length;
 }
 function selectedIds() {
   return [...document.querySelectorAll(".item-check:checked")].map(cb => cb.value);
@@ -407,6 +418,16 @@ document.addEventListener("click", (ev) => {
   if (btn) retryItem(btn.dataset.server, btn.dataset.id);
   const dbtn = ev.target.closest(".detail-btn");
   if (dbtn) toggleDetail(dbtn.dataset.id);
+});
+
+// 表头全选 checkbox
+document.addEventListener("change", (ev) => {
+  if (ev.target.id === "checkAll") {
+    const on = ev.target.checked;
+    document.querySelectorAll(".item-check").forEach(cb => cb.checked = on);
+  } else if (ev.target.classList.contains("item-check")) {
+    syncCheckAll();
+  }
 });
 
 // 展开/收起装备详情（词缀分类展示）
