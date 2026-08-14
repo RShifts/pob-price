@@ -79,12 +79,12 @@ Item Level: 71`);
     assert.ok(query.stats[0].filters.length <= 2);
   });
 
-  it("国际服固定 sale_type=securable（立即购买）", () => {
+  it("国际服固定 sale_type=priced（有标价可立即购买）", () => {
     const item = parseItemText(ring);
-    const q = buildSearchQuery(item, statMap, { saleType: "securable" });
+    const q = buildSearchQuery(item, statMap, { saleType: "priced" });
     const query = q.query as Record<string, any>;
     assert.equal(query.status.option, "any");
-    assert.equal(query.filters.trade_filters.filters.sale_type.option, "securable");
+    assert.equal(query.filters.trade_filters.filters.sale_type.option, "priced");
   });
 
   it("武器/身体 6 连：misc 加 sockets + links", () => {

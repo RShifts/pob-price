@@ -11,7 +11,7 @@ export interface QueryOptions {
   saleType?: string;
   /**
    * 国服必须用 any：国服后端对 status=online 静默返回 0。
-   * 国际服固定 status=any + sale_type=securable（立即购买），不再按在线过滤。
+   * 国际服固定 status=any + sale_type=priced（有标价，可立即购买），不再按在线过滤。
    */
   statusAny?: boolean;
   /**
@@ -76,7 +76,7 @@ export function buildSearchQuery(item: ParsedItem, statMap: StatMap, opts: Query
   const tradeFilters: Record<string, unknown> = {};
   if (opts.maxPrice != null) tradeFilters.price = { max: opts.maxPrice };
   if (opts.saleType) tradeFilters.sale_type = { option: opts.saleType };
-  // status 恒为 any：不按在线过滤（国际服靠 sale_type=securable 保证可立即购买；国服 online 会静默返回 0）
+  // status 恒为 any：不按在线过滤（国际服靠 sale_type=priced 保证有标价可立即购买；国服 online 会静默返回 0）
   const query: Record<string, unknown> = {
     status: { option: "any" },
     filters: {

@@ -27,7 +27,7 @@ export interface BatchOptions {
   deviationPct?: number;
   /** 每件取前 n 个挂牌 */
   limit: number;
-  /** 交易类型（如 securable=立即购买）。国际服默认 securable；国服不传（sale_type 会致 0） */
+  /** 交易类型（如 priced=有标价可立即购买）。国际服默认 priced；国服不传（sale_type 会致 0） */
   saleType?: string;
   /** 词缀过滤上限 */
   maxMods: number;
@@ -218,8 +218,8 @@ export class BatchPriceEngine {
 
   async run(build: RawBuild, opts: BatchOptions): Promise<BatchSummary> {
     const started = Date.now();
-    // 国际服固定 sale_type=securable（立即购买）；国服不传（sale_type 会致 0）
-    if (opts.saleType === undefined && opts.realm !== "cn") opts.saleType = "securable";
+    // 国际服固定 sale_type=priced（有标价可立即购买）；国服不传（sale_type 会致 0）
+    if (opts.saleType === undefined && opts.realm !== "cn") opts.saleType = "priced";
     const entries = this.buildEntries(build, { includeGems: opts.includeGems, onlyIds: opts.onlyIds });
     const statMap = new StatMap(await this.data.stats());
 

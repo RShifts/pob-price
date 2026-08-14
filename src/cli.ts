@@ -54,7 +54,7 @@ price 选项:
   --refresh-token <token>     （可选）国服 OAuth 刷新令牌（localStorage __POEREFRESH），自动换 access token
   --dpop-token <token>        （可选）国服 access token（localStorage __POESESSION）
   --crafted                   按文本匹配工艺词缀（默认不查：市集上大多没有同样的工艺）
-  （国际服固定只查"立即购买"（securable）挂牌；国服查全部）
+  （国际服固定只查有标价（priced）可立即购买的挂牌；国服查全部）
   --no-cache                  禁用磁盘缓存
 `;
 
@@ -79,7 +79,7 @@ function renderPriceReport(args: {
   const out: string[] = [];
   out.push("===== 单件查价 =====");
   out.push(`物品: ${displayName(item)} [${item.baseType ?? ""}]（${item.rarity}）`);
-  out.push(`联赛: ${league} | 模式: ${mode} | 交易: ${saleType === "securable" ? "立即购买" : "全部"} | 搜索id: ${searchId}`);
+  out.push(`联赛: ${league} | 模式: ${mode} | 交易: ${saleType === "priced" ? "有标价" : "全部"} | 搜索id: ${searchId}`);
   out.push(`集市链接: ${url}`);
   out.push(`匹配 ${total} 件，取前 ${Math.min(limit, summary.sampleCount, total || summary.sampleCount)}：`);
   summary.samples.forEach((s, i) => {
@@ -162,8 +162,8 @@ async function cmdPrice(input: string, values: Record<string, unknown>): Promise
 
   const query = buildSearchQuery(parsedItem, statMap, {
     deviationPct: Number(values.deviation ?? 10),
-    // 国际服固定 sale_type=securable（立即购买）；国服不传（sale_type 会致 0）
-    saleType: realm.id === "cn" ? undefined : "securable",
+    // 国际服固定 sale_type=priced（有标价可立即购买）；国服不传（sale_type 会致 0）
+    saleType: realm.id === "cn" ? undefined : "priced",
     maxMods: 8,
     craftedMode: values.crafted === true ? "match" : "none",
   });
@@ -227,7 +227,7 @@ async function cmdPrice(input: string, values: Record<string, unknown>): Promise
       item: parsedItem,
       league,
       mode,
-      saleType: realm.id === "cn" ? "any" : "securable",
+      saleType: realm.id === "cn" ? "any" : "priced",
       searchId: search.id,
       url,
       total: search.total,
