@@ -8,7 +8,7 @@ import { aggregatePrices, toPriceSamples } from "../trade/price.js";
 import { buildGemQuery, buildSearchQuery, tradeSearchUrl } from "../trade/query.js";
 import { StatMap } from "../trade/stats.js";
 import type { Listing, SearchResponse, StatEntry } from "../trade/types.js";
-import { fetchChaosConversion } from "../pricer/ninja.js";
+import { fetchChaosConversion, normalizeConversion } from "../pricer/ninja.js";
 
 /** 数据提供方（TradeData 满足该结构）。 */
 export interface DataProvider {
@@ -72,6 +72,8 @@ export interface BatchItemResult {
   medianChaos: number | null;
   avgChaos: number | null;
   sampleCount: number;
+  /** 最低价的原始显示（如 "2 divine" / "150c"；折算失败时也能看到原始货币价） */
+  priceLabel?: string;
   url: string;
   error?: string;
 }
@@ -158,6 +160,10 @@ export class BatchPriceEngine {
 
     if (entry.kind === "item") {
       const parsed = localizeItem(parseItemText(entry.slot.rawText), opts.realm ?? "intl");
+      // 国服传奇名翻译缺失（如新版装备未收录）：仍用英文名 → 查不到。退化为只用基底(type)搜
+      if (opts.realm === "cn" && parsed.rarity === "Unique" && parsed.name && /[a-z]/i.test(parsed.name)) {
+        parsed.name = undefined;
+      }
       // 国服：status 必须 any（online 会静默返回 0）；sale_type 会致 0，不传
       const query = buildSearchQuery(parsed, statMap, { deviationPct: opts.deviationPct, saleType: opts.saleType, craftedMode: opts.craftedMode, maxMods: opts.maxMods, statusAny: opts.realm === "cn" });
       const search = await this.client.search(opts.league, query);
@@ -184,6 +190,10 @@ export class BatchPriceEngine {
         result.medianChaos = agg.medianChaos;
         result.avgChaos = agg.avgChaos;
         result.sampleCount = agg.sampleCount;
+        if (samples.length > 0) {
+          const s = samples[0];
+          result.priceLabel = s.chaosValue != null ? `${Math.round(s.chaosValue)}c` : `${s.amount} ${s.currency}`;
+        }
       }
       return result;
     } else {
@@ -225,7 +235,7 @@ export class BatchPriceEngine {
 
     let conversion = new Map<string, number>();
     try {
-      conversion = new Map(await this.conversionProvider(opts.league));
+      conversion = normalizeConversion(new Map(await this.conversionProvider(opts.league)));
     } catch {
       // 折算表不可用：混沌基准 1:1（price.ts 已兜底）
     }

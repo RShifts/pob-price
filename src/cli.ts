@@ -5,7 +5,7 @@ import { parseArgs } from "node:util";
 import { parseItemText } from "./item/parser.js";
 import { resolveInputToXml as resolveXml, selectItem } from "./input.js";
 import { displayName } from "./item/types.js";
-import { fetchChaosConversion } from "./pricer/ninja.js";
+import { fetchChaosConversion, normalizeConversion } from "./pricer/ninja.js";
 import { decodePobCode, looksLikePobCode } from "./pob/codec.js";
 import { fetchAndDecode, isPobbUrl } from "./pob/link.js";
 import { parseBuildXml } from "./pob/xml.js";
@@ -191,7 +191,7 @@ async function cmdPrice(input: string, values: Record<string, unknown>): Promise
   let conversion = new Map<string, number>();
   if (realm.id === "intl") {
     try {
-      conversion = await fetchChaosConversion(league, useCache ? new DiskCache() : undefined);
+      conversion = normalizeConversion(await fetchChaosConversion(league, useCache ? new DiskCache() : undefined));
     } catch (e) {
       console.error("警告: 通货折算表获取失败，按原价展示:", e instanceof Error ? e.message : e);
     }

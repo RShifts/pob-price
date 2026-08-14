@@ -2533,6 +2533,7 @@ export const EN_CN_NAMES: Record<string, string> = {
   "Foulborn Exalted Orb": "秽生崇高石",
   "Foulborn Orb of Augmentation": "秽生增幅石",
   "Foulborn Regal Orb": "秽生富豪石",
+  "Foulborn Esh's Mirror": "秽生艾许之镜",
   "Foulgrasp Support": "邪秽之握（辅）",
   "Foundry Bow": "铸造弓",
   "Fourth Piece of Focus": "不屈先驱者IV",

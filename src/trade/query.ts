@@ -69,8 +69,12 @@ export function buildSearchQuery(item: ParsedItem, statMap: StatMap, opts: Query
 
   const typeFilters: Record<string, unknown> = {};
   const rarity = item.rarity.toLowerCase();
-  if (["normal", "magic", "rare", "unique"].includes(rarity)) {
-    typeFilters.rarity = { option: rarity };
+  // 非传奇（normal/magic/rare）统一用 nonunique（"任何非传奇"），避免只匹配指定稀有度导致搜不到；
+  // 传奇仍用 unique。
+  if (rarity === "unique") {
+    typeFilters.rarity = { option: "unique" };
+  } else if (["normal", "magic", "rare"].includes(rarity)) {
+    typeFilters.rarity = { option: "nonunique" };
   }
 
   const tradeFilters: Record<string, unknown> = {};

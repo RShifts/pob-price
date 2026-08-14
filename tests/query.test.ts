@@ -43,7 +43,7 @@ Item Level: 71`);
     const q = buildSearchQuery(item, statMap, {});
     const query = q.query as Record<string, any>;
     assert.equal(query.type.option, "Two-Stone Ring");
-    assert.equal(query.filters.type_filters.filters.rarity.option, "rare");
+    assert.equal(query.filters.type_filters.filters.rarity.option, "nonunique");
     const and = query.stats[0].filters;
     const ids = and.map((f: any) => f.id);
     assert.ok(ids.includes("explicit.stat_mana"), "应包含 mana 词缀");
