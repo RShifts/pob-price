@@ -24,17 +24,17 @@ Curse Enemies with Level 12 Warlord's Mark on Hit
 {crafted}+54 to maximum Life`;
 
 describe("buildSearchQuery", () => {
-  it("唯一装：name + type，无词缀过滤", () => {
+  it("传奇：基底 + unique 稀有度 + 词缀（不用完整名字，避免翻译缺失查不到）", () => {
     const item = parseItemText(`Rarity: UNIQUE
 Inpulsa's Broken Heart
 Sadist Garb
 Item Level: 71`);
     const q = buildSearchQuery(item, statMap, {});
     const query = q.query as Record<string, any>;
-    assert.equal(query.name.option, "Inpulsa's Broken Heart");
+    assert.equal(query.name, undefined, "不应按完整名字过滤");
     assert.equal(query.type.option, "Sadist Garb");
+    assert.equal(query.filters.type_filters.filters.rarity.option, "unique");
     assert.equal(query.status.option, "any");
-    assert.equal(query.stats, undefined);
     assert.equal(q.sort.price, "asc");
   });
 

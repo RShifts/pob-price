@@ -89,7 +89,7 @@ export function buildSearchQuery(item: ParsedItem, statMap: StatMap, opts: Query
       misc_filters: { filters: {} },
     },
   };
-  if (item.rarity === "Unique" && item.name) query.name = { option: item.name };
+  // 传奇：不用完整名字（新版本翻译可能缺失导致查不到），用 基底 + 传奇稀有度 + 词缀 过滤
   if (item.baseType) query.type = { option: item.baseType };
 
   // 武器 / 身体装备：孔数加入查询；6 连额外要求链接数（六连对价格影响极大）
@@ -106,7 +106,9 @@ export function buildSearchQuery(item: ParsedItem, statMap: StatMap, opts: Query
     misc.filters = filters;
   }
 
-  if (item.rarity !== "Unique" && item.rarity !== "Normal") {
+  if (item.rarity !== "Normal") {
+    // 传奇也参与词缀过滤：unique 专属词缀大多无 stat id（匹配不上自动跳过），
+    // 能匹配的通用词缀（抗性/生命等）会带上，提高精准度
     const candidates: { modText: string; prefer?: string; score: number }[] = [];
     const add = (mods: string[], prefer?: string) => {
       for (const modText of mods) candidates.push({ modText, prefer, score: scoreModText(modText) });
