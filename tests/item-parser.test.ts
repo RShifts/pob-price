@@ -41,6 +41,14 @@ describe("parseItemText — POB 导出格式", () => {
     assert.ok(p.craftMods.length > 0, "cluster jewel 应有 crafted 词缀");
   });
 
+  it("魔法物品（Magic）：从显示名提取基底，词缀不误当基底", () => {
+    const p = parseItemText(itemTextByName(realPobb, "Quicksilver Flask of Incision"));
+    assert.equal(p.rarity, "Magic");
+    assert.equal(p.baseType, "Quicksilver Flask");
+    assert.ok(!(p.baseType ?? "").includes("chance to gain"), "词缀文本不应被当作基底");
+    assert.ok(p.explicitMods.length > 0, "词缀应正常解析");
+  });
+
   it("腐化标记识别", () => {
     const b = parseBuildXml(importCode);
     const hasCorruptedLine = b.items.some((i) =>

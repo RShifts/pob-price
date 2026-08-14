@@ -1,4 +1,5 @@
 import type { ParsedItem, Rarity } from "./types.js";
+import { EN_CN_NAMES } from "../trade/data/en-cn.js";
 
 const RARITY_MAP: Record<string, Rarity> = {
   NORMAL: "Normal",
@@ -73,7 +74,13 @@ export function parseItemText(rawText: string): ParsedItem {
       // 游戏内格式（含 Item Class/分隔线）：Rare/Normal 只有基底一行。
       const next = nextMeaningful(lines, i + 1);
       if (next !== null && !isMetaLine(lines[next])) {
-        if (item.rarity === "Unique" || item.rarity === "Magic" || (item.rarity === "Rare" && isPobFormat(rawText))) {
+        if (item.rarity === "Magic") {
+          // Magic 物品 POB 导出无独立基底行：显示名 = "<前缀> <基底> of <后缀>"，
+          // 下一行是 Unique ID 等元信息；基底从显示名提取
+          item.name = lines[next];
+          nameLineIdx = next;
+          item.baseType = extractBaseFromName(lines[next]);
+        } else if (item.rarity === "Unique" || (item.rarity === "Rare" && isPobFormat(rawText))) {
           item.name = lines[next];
           nameLineIdx = next;
           const base = nextMeaningful(lines, next + 1);
@@ -147,6 +154,25 @@ export function parseItemText(rawText: string): ParsedItem {
   }
 
   return item;
+}
+
+// 基底名清单（en-cn.ts 的键，含所有基底类型），用于从 Magic 物品显示名提取基底
+const BASE_NAMES: string[] = (() => {
+  const keys = Object.keys(EN_CN_NAMES);
+  // 只保留"看起来像基底"的条目：含空格的多词名（排除宝石/命运卡等单行名）
+  return keys.filter((k) => k.includes(" ")).sort((a, b) => b.length - a.length);
+})();
+
+/**
+ * 从 Magic 物品显示名提取基底类型。
+ * Magic 物品名 = "<前缀> <基底> of <后缀>"（如 "Clinician's Quicksilver Flask of the Hare"），
+ * 用基底清单做最长子串匹配。
+ */
+function extractBaseFromName(name: string): string | undefined {
+  for (const base of BASE_NAMES) {
+    if (name.includes(base)) return base;
+  }
+  return undefined;
 }
 
 /** POB 导出格式标记：含 Unique ID / LevelReq 行（区别于游戏内 Ctrl+C 文本） */
