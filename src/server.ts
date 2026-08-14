@@ -10,6 +10,7 @@ import type { BatchItemResult, BatchSummary } from "./batch/engine.js";
 import { TradeData } from "./trade/data.js";
 import { TradeClient } from "./trade/client.js";
 import { realmOf, translateToCn } from "./trade/realms.js";
+import { translateModsToCn } from "./trade/mod-cn.js";
 import { DiskCache } from "./trade/cache.js";
 
 const INDEX_HTML = readFileSync(new URL("../web/index.html", import.meta.url), "utf8");
@@ -73,6 +74,15 @@ async function handleParse(body: { input?: string }): Promise<unknown> {
         fractured: p.fracturedMods,
         synthesized: p.synthesizedMods,
         enchant: p.enchantMods,
+      },
+      // 词缀中文翻译（与 mods 同结构；cn 为 null 表示未翻译）
+      modsCn: {
+        implicit: translateModsToCn(p.implicitMods),
+        explicit: translateModsToCn(p.explicitMods),
+        crafted: translateModsToCn(p.craftMods),
+        fractured: translateModsToCn(p.fracturedMods),
+        synthesized: translateModsToCn(p.synthesizedMods),
+        enchant: translateModsToCn(p.enchantMods),
       },
     };
   });

@@ -43,7 +43,9 @@
   .mod-detail-inner { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
   .mod-sec { border-left:2px solid var(--border); padding-left:8px; }
   .mod-label { color:var(--acc); font-size:11px; font-weight:700; display:block; margin-bottom:3px; }
-  .mod-line { font-size:12px; line-height:1.5; }
+  .mod-line { font-size:12px; line-height:1.6; }
+  .mod-cn { color:var(--fg); }
+  .mod-en { color:var(--dim); font-size:11px; }
   @media (max-width:1000px){ .mod-detail-inner{ grid-template-columns:1fr; } }
   .cookie-line { display:flex; gap:8px; align-items:center; }
   .cookie-line input { flex:1; }
@@ -416,13 +418,20 @@ function toggleDetail(id) {
   const it = state.items.find((x) => x.id === id);
   if (!it) return;
   const m = it.mods || {};
+  const mc = it.modsCn || {};
   const sections = [
-    ["隐性词缀", m.implicit], ["显性词缀", m.explicit], ["工艺词缀", m.crafted],
-    ["裂痕词缀", m.fractured], ["合成词缀", m.synthesized], ["附魔词缀", m.enchant],
+    ["隐性词缀", m.implicit, mc.implicit], ["显性词缀", m.explicit, mc.explicit], ["工艺词缀", m.crafted, mc.crafted],
+    ["裂痕词缀", m.fractured, mc.fractured], ["合成词缀", m.synthesized, mc.synthesized], ["附魔词缀", m.enchant, mc.enchant],
   ].filter(([, arr]) => arr && arr.length);
-  const html = sections.map(([label, arr]) =>
+  const html = sections.map(([label, arr, arrCn]) =>
     '<div class="mod-sec"><span class="mod-label">' + label + "</span>" +
-    arr.map((x) => '<div class="mod-line">' + esc(x) + "</div>").join("") + "</div>"
+    arr.map((x, i) => {
+      const c = arrCn && arrCn[i] ? arrCn[i].cn : null;
+      const line = c
+        ? '<div class="mod-line"><span class="mod-cn">' + esc(c) + "</span> <span class="mod-en">" + esc(x) + "</span></div>"
+        : '<div class="mod-line">' + esc(x) + "</div>";
+      return line;
+    }).join("") + "</div>"
   ).join("");
   const quality = it.quality != null ? " | 品质 +" + it.quality + "%" : "";
   const tr = document.createElement("tr");

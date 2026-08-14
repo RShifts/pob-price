@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { translateToCn, localizeItem, localizeGemName, realmOf } from "../src/trade/realms.js";
+import { translateModToCn, translateModsToCn } from "../src/trade/mod-cn.js";
 import { parseItemText } from "../src/item/parser.js";
 
 describe("translateToCn", () => {
@@ -22,6 +23,38 @@ describe("translateToCn", () => {
   it("查不到返回原值", () => {
     assert.equal(translateToCn("完全未知的物品名XYZ"), "完全未知的物品名XYZ");
     assert.equal(translateToCn(""), "");
+  });
+});
+
+describe("translateModToCn", () => {
+  it("常用显性词缀：数字归一化 → 查表 → 替换回数字", () => {
+    assert.equal(translateModToCn("+31 to maximum Mana"), "+31 最大魔力");
+    assert.equal(translateModToCn("34% increased Spell Damage"), "法术伤害提高 34%");
+    assert.equal(translateModToCn("Adds 5 to 10 Fire Damage"), "该装备附加 5 - 10 基础火焰伤害");
+    assert.equal(translateModToCn("+45 to Strength"), "+45 力量");
+    assert.equal(translateModToCn("+12% to Fire Resistance"), "+12% 火焰抗性");
+    assert.equal(translateModToCn("Regenerate 1.5 Life per second"), "生命每秒再生 1.5");
+  });
+
+  it("无占位符的固定词缀（如 Culling Strike）", () => {
+    assert.equal(translateModToCn("Culling Strike"), "终结");
+  });
+
+  it("POB 珠宝半径标注（手工兜底）", () => {
+    assert.equal(translateModToCn("Radius: Small"), "半径：小型");
+    assert.equal(translateModToCn("Radius: Large"), "半径：大型");
+  });
+
+  it("查不到返回 null", () => {
+    assert.equal(translateModToCn("完全未知的词缀文本XYZ"), null);
+  });
+
+  it("translateModsToCn 批量：cn 为 null 表示未翻译", () => {
+    const out = translateModsToCn(["+1 to Level of all Skill Gems", "未知词缀"]);
+    assert.equal(out.length, 2);
+    assert.equal(out[0].cn, "所有主动技能石等级 +1");
+    assert.equal(out[0].en, "+1 to Level of all Skill Gems");
+    assert.equal(out[1].cn, null);
   });
 });
 
