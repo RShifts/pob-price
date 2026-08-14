@@ -80,16 +80,19 @@ export function parseItemText(rawText: string): ParsedItem {
           item.name = lines[next];
           nameLineIdx = next;
           item.baseType = extractBaseFromName(lines[next]);
+          item.baseTypeEn = item.baseType;
         } else if (item.rarity === "Unique" || (item.rarity === "Rare" && isPobFormat(rawText))) {
           item.name = lines[next];
           nameLineIdx = next;
           const base = nextMeaningful(lines, next + 1);
           if (base !== null && !isMetaLine(lines[base])) {
             item.baseType = lines[base];
+            item.baseTypeEn = lines[base];
             baseLineIdx = base;
           }
         } else {
           item.baseType = lines[next];
+          item.baseTypeEn = lines[next];
           baseLineIdx = next;
         }
       }

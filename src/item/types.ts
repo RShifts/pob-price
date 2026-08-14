@@ -16,6 +16,8 @@ export interface ParsedItem {
   /** 唯一装/魔法装显示名；稀有与普通装无名字段 */
   name?: string;
   baseType?: string;
+  /** 英文原始基底（localizeItem 后仍保留，用于英文关键词判断如 6 连） */
+  baseTypeEn?: string;
   itemLevel?: number;
   levelReq?: number;
   quality?: number;

@@ -38,6 +38,8 @@ export function localizeItem(item: ParsedItem, realm: RealmId): ParsedItem {
     ...item,
     name: item.name ? translateToCn(item.name) : undefined,
     baseType: item.baseType ? translateToCn(item.baseType) : undefined,
+    // 保留英文原始基底（6 连等英文关键词判断用）
+    baseTypeEn: item.baseTypeEn ?? item.baseType,
   };
 }
 

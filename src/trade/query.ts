@@ -89,7 +89,8 @@ export function buildSearchQuery(item: ParsedItem, statMap: StatMap, opts: Query
   if (item.baseType) query.type = { option: item.baseType };
 
   // 武器 / 身体装备：孔数加入查询；6 连额外要求链接数（六连对价格影响极大）
-  const baseLower = (item.baseType ?? "").toLowerCase();
+  // 用英文原始基底判断（国服 baseType 是中文，英文关键词匹配不上）
+  const baseLower = (item.baseTypeEn ?? item.baseType ?? "").toLowerCase();
   const isWeapon = /axe|sword|dagger|claw|mace|staff|wand|bow|sceptre|hammer|rapier|foil|talon|sickle|spear|trident|warhammer|maul|warstaff|sai|hook|harpoon|bayonet|jade hatchet|sharktooth/.test(baseLower);
   const isBodyArmour = /garb|regalia|armou?r|plate|mail|jacket|coat|gown|robe|vest|mantle|cuirass|breastplate/.test(baseLower);
   if ((isWeapon || isBodyArmour) && item.linkCount != null && item.linkCount > 0) {
