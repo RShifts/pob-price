@@ -39,6 +39,12 @@
   a { color:#7ab8e0; }
   .error { color:var(--err); }
   .grid2 { display:grid; grid-template-columns:auto 1fr; gap:4px 12px; align-items:center; }
+  .mod-detail td { background:#171a21; }
+  .mod-detail-inner { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .mod-sec { border-left:2px solid var(--border); padding-left:8px; }
+  .mod-label { color:var(--acc); font-size:11px; font-weight:700; display:block; margin-bottom:3px; }
+  .mod-line { font-size:12px; line-height:1.5; }
+  @media (max-width:1000px){ .mod-detail-inner{ grid-template-columns:1fr; } }
   .cookie-line { display:flex; gap:8px; align-items:center; }
   .cookie-line input { flex:1; }
   /* 弹窗 */
@@ -104,7 +110,7 @@
     <h3 style="margin:0 0 8px">装备列表 <span id="itemCount" class="badge"></span></h3>
     <div class="table-scroll">
       <table id="itemsTable">
-        <thead><tr><th></th><th>名称</th><th>基底</th><th>稀有度</th><th>类别</th><th>ILv</th><th>孔</th><th>腐化</th></tr></thead>
+        <thead><tr><th></th><th>名称</th><th>基底</th><th>稀有度</th><th>类别</th><th>ILv</th><th>孔</th><th>腐化</th><th>详情</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -193,7 +199,8 @@ function renderItems(data) {
     tr.innerHTML = `<td><input type="checkbox" class="item-check" value="${it.id}" checked></td>
       <td>${bi(it.nameCn, it.name)}${it.corrupted ? '<span class="badge corrupt">腐化</span>' : ""}</td>
       <td>${bi(it.baseTypeCn, it.baseType)}</td><td>${esc(it.rarity)}</td><td>${esc(it.category)}</td>
-      <td>${it.ilvl ?? ""}</td><td>${esc(it.sockets)}</td><td></td>`;
+      <td>${it.ilvl ?? ""}</td><td>${esc(it.sockets)}</td><td></td>
+      <td><button class="small secondary detail-btn" data-id="${esc(it.id)}">详情</button></td>`;
     tbody.appendChild(tr);
   }
   $("itemsPanel").style.display = "block";
@@ -396,7 +403,35 @@ loadLeagues();
 document.addEventListener("click", (ev) => {
   const btn = ev.target.closest(".retry-btn");
   if (btn) retryItem(btn.dataset.server, btn.dataset.id);
+  const dbtn = ev.target.closest(".detail-btn");
+  if (dbtn) toggleDetail(dbtn.dataset.id);
 });
+
+// 展开/收起装备详情（词缀分类展示）
+function toggleDetail(id) {
+  const row = document.querySelector('.item-row input[value="' + id + '"]')?.closest("tr");
+  if (!row) return;
+  const next = row.nextElementSibling;
+  if (next && next.classList.contains("mod-detail")) { next.remove(); return; }
+  const it = state.items.find((x) => x.id === id);
+  if (!it) return;
+  const m = it.mods || {};
+  const sections = [
+    ["隐性词缀", m.implicit], ["显性词缀", m.explicit], ["工艺词缀", m.crafted],
+    ["裂痕词缀", m.fractured], ["合成词缀", m.synthesized], ["附魔词缀", m.enchant],
+  ].filter(([, arr]) => arr && arr.length);
+  const html = sections.map(([label, arr]) =>
+    '<div class="mod-sec"><span class="mod-label">' + label + "</span>" +
+    arr.map((x) => '<div class="mod-line">' + esc(x) + "</div>").join("") + "</div>"
+  ).join("");
+  const quality = it.quality != null ? " | 品质 +" + it.quality + "%" : "";
+  const tr = document.createElement("tr");
+  tr.className = "mod-detail";
+  tr.innerHTML = '<td colspan="9"><div class="mod-detail-inner">' +
+    '<div style="grid-column:1/-1" class="hint">' + esc(it.itemClass || "") + " | ILv " + (it.ilvl ?? "-") + quality + " | 孔 " + esc(it.sockets || "-") + "</div>" +
+    (html || '<span class="hint">（无词缀信息）</span>') + "</div></td>";
+  row.after(tr);
+}
 </script>
 </body>
 </html>

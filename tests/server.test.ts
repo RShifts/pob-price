@@ -44,6 +44,10 @@ describe("server API", () => {
     assert.ok(inpulsa, "应找到 Inpulsa");
     assert.equal(inpulsa.nameCn, "速度之力");
     assert.equal(inpulsa.baseTypeCn, "狂虐者束衣");
+    // 词缀详情：稀有戒指应有显性词缀
+    const ring = j.items.find((i: any) => i.baseType === "Two-Stone Ring");
+    assert.ok(ring && ring.mods.explicit.length > 0, "应有显性词缀");
+    assert.ok(ring.mods.crafted.length > 0, "应有工艺词缀");
   });
 
   it("POST /api/parse 错误输入返回 500", async () => {

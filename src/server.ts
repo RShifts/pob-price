@@ -60,10 +60,20 @@ async function handleParse(body: { input?: string }): Promise<unknown> {
       rarity: p.rarity,
       itemClass: p.itemClass ?? "",
       ilvl: p.itemLevel ?? null,
+      quality: p.quality ?? null,
       sockets: p.sockets ?? "",
       corrupted: p.corrupted,
       category: categorizeItem(p),
       uniqueId: p.uniqueId ?? null,
+      // 详细词缀（UI 展开显示）
+      mods: {
+        implicit: p.implicitMods,
+        explicit: p.explicitMods,
+        crafted: p.craftMods,
+        fractured: p.fracturedMods,
+        synthesized: p.synthesizedMods,
+        enchant: p.enchantMods,
+      },
     };
   });
   const gems = build.skills.flatMap((s) => s.gems.map((g) => {
