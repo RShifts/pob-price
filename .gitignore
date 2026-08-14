@@ -12,3 +12,4 @@ cn_cookie*
 .cache/
 .npm-cache/
 *.csv
+*.lua

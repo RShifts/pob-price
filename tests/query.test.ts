@@ -52,12 +52,23 @@ Item Level: 71`);
     assert.deepEqual(mana.value, { min: 31 });
   });
 
-  it("includeCrafted=true 时工艺词缀纳入过滤", () => {
+  it("craftedMode=match 时工艺词缀按文本纳入过滤", () => {
     const item = parseItemText(ring);
-    const q = buildSearchQuery(item, statMap, { includeCrafted: true });
+    const q = buildSearchQuery(item, statMap, { craftedMode: "match" });
     const query = q.query as Record<string, any>;
     const ids = query.stats[0].filters.map((f: any) => f.id);
-    assert.ok(ids.includes("craft.stat_life"), "开启 includeCrafted 后应包含工艺词缀");
+    assert.ok(ids.includes("craft.stat_life"), "match 模式应包含工艺词缀");
+  });
+
+  it("craftedMode=empty 时要求空1前缀/后缀（工艺文本不纳入过滤）", () => {
+    const item = parseItemText(ring); // 含 {crafted}+54 to maximum Life（前缀）
+    const q = buildSearchQuery(item, statMap, { craftedMode: "empty" });
+    const query = q.query as Record<string, any>;
+    const ids = (query.stats?.[0]?.filters ?? []).map((f: any) => f.id);
+    assert.ok(!ids.includes("craft.stat_life"), "empty 模式不匹配工艺文本");
+    const misc = query.filters.misc_filters.filters;
+    assert.deepEqual(misc.empty_prefix_mods, { min: 1 }, "前缀工艺 → 空1前缀");
+    assert.equal(misc.empty_suffix_mods, undefined, "无后缀工艺 → 不要求空后缀");
   });
 
   it("稀有装：偏差百分比放宽 min 值", () => {

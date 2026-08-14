@@ -119,7 +119,9 @@ async function runPriceJob(job: PriceJob, body: Record<string, unknown>): Promis
   const limit = Number(body.limit ?? 3);
   const onlyIds = Array.isArray(body.onlyIds) ? (body.onlyIds as string[]) : undefined;
   const includeGems = body.includeGems !== false;
-  const includeCrafted = body.includeCrafted === true;
+  const craftedMode = (["none", "empty", "match"] as const).includes(body.craftedMode as never)
+    ? (body.craftedMode as "none" | "empty" | "match")
+    : "none";
   job.progress = { done: 0, total: servers.length, label: "解析完成，开始查价" };
 
   let doneCount = 0;
@@ -138,7 +140,7 @@ async function runPriceJob(job: PriceJob, body: Record<string, unknown>): Promis
       deviationPct,
       limit,
       maxMods: 8,
-      includeCrafted,
+      craftedMode,
       includeGems,
       onlyIds,
       realm: realm.id,

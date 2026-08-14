@@ -92,8 +92,12 @@
       <input type="number" id="limit" value="3" min="1" max="10" style="width:70px">
       <label for="delay">请求间隔（ms，防限流）</label>
       <input type="number" id="delay" value="3000" min="1000" step="500" style="width:90px">
-      <label for="crafted" title="市集上大多没有同样的工艺词缀，勾选后匹配会非常严格">工艺词缀</label>
-      <input type="checkbox" id="crafted" style="width:auto">
+      <label for="craftedMode" title="工艺词缀处理方式：默认忽略；空位=搜还有空位可自己上工艺的装备；匹配=按工艺文本精确匹配">工艺词缀</label>
+      <select id="craftedMode" style="width:auto">
+        <option value="none">忽略</option>
+        <option value="empty" selected>空1前缀/后缀</option>
+        <option value="match">文本匹配</option>
+      </select>
     </div>
     <div class="row" style="margin-top:12px">
       <button id="priceIntlBtn" onclick="price('intl')" disabled>🌍 国际服查价</button>
@@ -266,7 +270,7 @@ async function runPrice(server) {
     servers: [server],
     onlyIds: ids.length ? ids : undefined,
     includeGems: ids.length ? false : true,
-    includeCrafted: $("crafted").checked,
+    craftedMode: $("craftedMode").value,
     deviationPct: Number($("deviation").value) || 0,
     limit: Number($("limit").value) || 3,
     delay: Number($("delay").value) || 3000,
@@ -369,7 +373,7 @@ async function retryItem(server, itemId) {
     servers: [server],
     onlyIds: [itemId],
     includeGems: itemId.startsWith("gem:"),
-    includeCrafted: $("crafted").checked,
+    craftedMode: $("craftedMode").value,
     deviationPct: Number($("deviation").value) || 0,
     limit: Number($("limit").value) || 3,
     delay: Number($("delay").value) || 3000,

@@ -31,8 +31,8 @@ export interface BatchOptions {
   saleType?: string;
   /** 词缀过滤上限 */
   maxMods: number;
-  /** 是否把工艺词缀（crafted）纳入过滤（默认 false，市集上大多没有同样的工艺） */
-  includeCrafted?: boolean;
+  /** 工艺词缀处理："none" 默认忽略 / "empty" 要求空1前缀或后缀 / "match" 按文本匹配 */
+  craftedMode?: "none" | "empty" | "match";
   /** 是否给技能宝石查价 */
   includeGems: boolean;
   /** 进度回调（已处理数, 总数, 标签） */
@@ -159,7 +159,7 @@ export class BatchPriceEngine {
     if (entry.kind === "item") {
       const parsed = localizeItem(parseItemText(entry.slot.rawText), opts.realm ?? "intl");
       // 国服：status 必须 any（online 会静默返回 0）；sale_type 会致 0，不传
-      const query = buildSearchQuery(parsed, statMap, { deviationPct: opts.deviationPct, saleType: opts.saleType, includeCrafted: opts.includeCrafted, maxMods: opts.maxMods, statusAny: opts.realm === "cn" });
+      const query = buildSearchQuery(parsed, statMap, { deviationPct: opts.deviationPct, saleType: opts.saleType, craftedMode: opts.craftedMode, maxMods: opts.maxMods, statusAny: opts.realm === "cn" });
       const search = await this.client.search(opts.league, query);
       const statCount = ((query.query as Record<string, unknown>).stats as { filters?: unknown[] }[] | undefined)?.[0]?.filters?.length ?? 0;
       const result: BatchItemResult = {
