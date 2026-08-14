@@ -191,8 +191,8 @@ function renderItems(data) {
     const tr = document.createElement("tr");
     tr.className = "item-row";
     tr.innerHTML = `<td><input type="checkbox" class="item-check" value="${it.id}" checked></td>
-      <td>${esc(it.name)}${it.corrupted ? '<span class="badge corrupt">腐化</span>' : ""}</td>
-      <td>${esc(it.baseType)}</td><td>${esc(it.rarity)}</td><td>${esc(it.category)}</td>
+      <td>${bi(it.nameCn, it.name)}${it.corrupted ? '<span class="badge corrupt">腐化</span>' : ""}</td>
+      <td>${bi(it.baseTypeCn, it.baseType)}</td><td>${esc(it.rarity)}</td><td>${esc(it.category)}</td>
       <td>${it.ilvl ?? ""}</td><td>${esc(it.sockets)}</td><td></td>`;
     tbody.appendChild(tr);
   }
@@ -327,7 +327,7 @@ function renderPrice(server, rows, summary) {
     const retry = (r.error && r.kind === "item" && r.ids && r.ids.length)
       ? ` <button class="small secondary" onclick="retryItem('${server}', '${r.ids[0]}', '${escKey(r.key)}')">重试</button>`
       : "";
-    tr.innerHTML = `<td>${esc(r.name)}${r.gemLevel != null ? ' <span class="badge">lv' + r.gemLevel + '</span>' : ""}${r.count > 1 ? " ×" + r.count : ""}${retry}</td>
+    tr.innerHTML = `<td>${bi(r.nameCn, r.name)}${r.gemLevel != null ? ' <span class="badge">lv' + r.gemLevel + '</span>' : ""}${r.count > 1 ? " ×" + r.count : ""}${retry}</td>
       <td class="num">${fmt(r.minChaos)}</td><td class="num">${fmt(r.medianChaos)}</td><td class="num">${fmt(r.avgChaos)}</td>
       <td class="num">${r.sampleCount}</td><td class="num">${r.total}</td>
       <td>${r.url ? '<a href="' + esc(r.url) + '" target="_blank">市集</a>' : (r.error ? esc(r.error.slice(0, 30)) : "")}</td>`;
@@ -366,6 +366,12 @@ async function retryItem(server, itemId) {
 }
 
 function escKey(s) { return String(s).replace(/'/g, "\\'").replace(/"/g, "&quot;"); }
+
+// 双语显示：中文主显，英文小字辅助
+function bi(cn, en) {
+  if (!cn || cn === en) return esc(en);
+  return esc(cn) + ' <span class="hint" style="font-size:11px">' + esc(en) + "</span>";
+}
 
 function fmt(v) { return v == null ? "-" : v.toFixed(1) + "c"; }
 function esc(s) { return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }

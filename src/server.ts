@@ -9,7 +9,7 @@ import { BatchPriceEngine } from "./batch/engine.js";
 import type { BatchItemResult, BatchSummary } from "./batch/engine.js";
 import { TradeData } from "./trade/data.js";
 import { TradeClient } from "./trade/client.js";
-import { realmOf } from "./trade/realms.js";
+import { realmOf, translateToCn } from "./trade/realms.js";
 import { DiskCache } from "./trade/cache.js";
 
 const INDEX_HTML = readFileSync(new URL("../web/index.html", import.meta.url), "utf8");
@@ -49,10 +49,14 @@ async function handleParse(body: { input?: string }): Promise<unknown> {
   const build = parseBuildXml(xml);
   const items = build.items.map((it) => {
     const p = parseItemText(it.rawText);
+    const name = p.name ?? p.baseType ?? "(未命名)";
+    const baseType = p.baseType ?? "";
     return {
       id: it.id,
-      name: p.name ?? p.baseType ?? "(未命名)",
-      baseType: p.baseType ?? "",
+      name,
+      nameCn: translateToCn(name),
+      baseType,
+      baseTypeCn: baseType ? translateToCn(baseType) : "",
       rarity: p.rarity,
       itemClass: p.itemClass ?? "",
       ilvl: p.itemLevel ?? null,
@@ -62,12 +66,10 @@ async function handleParse(body: { input?: string }): Promise<unknown> {
       uniqueId: p.uniqueId ?? null,
     };
   });
-  const gems = build.skills.flatMap((s) => s.gems.map((g) => ({
-    name: g.name ?? g.gemId.split("/").pop() ?? "?",
-    level: g.level,
-    quality: g.quality,
-    slot: s.slot ?? "",
-  })));
+  const gems = build.skills.flatMap((s) => s.gems.map((g) => {
+    const name = g.name ?? g.gemId.split("/").pop() ?? "?";
+    return { name, nameCn: translateToCn(name), level: g.level, quality: g.quality, slot: s.slot ?? "" };
+  }));
   return {
     source,
     info: build.info,
@@ -125,7 +127,7 @@ async function runPriceJob(job: PriceJob, body: Record<string, unknown>): Promis
         job.progress = { done: doneCount, total: totalItems, label: sid + ": " + done + "/" + total };
       },
       onItem: (r) => {
-        partial.push(r);
+        partial.push({ ...r, nameCn: translateToCn(r.name) });
         job.partial[sid as "intl" | "cn"] = [...partial];
       },
     });

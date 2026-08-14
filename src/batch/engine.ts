@@ -54,6 +54,8 @@ export interface BatchItemResult {
   count: number;
   category: string;
   name: string;
+  /** 中文名（UI 展示用，由服务端附加） */
+  nameCn?: string;
   baseType?: string;
   rarity?: string;
   ilvl?: number;

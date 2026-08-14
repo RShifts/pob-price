@@ -39,6 +39,11 @@ describe("server API", () => {
     assert.equal(j.items.length, 21);
     assert.equal(j.info.className, "Witch");
     assert.ok(j.gems.length > 0);
+    // 中文名：Inpulsa's Broken Heart → 速度之力
+    const inpulsa = j.items.find((i: any) => i.name.includes("Inpulsa"));
+    assert.ok(inpulsa, "应找到 Inpulsa");
+    assert.equal(inpulsa.nameCn, "速度之力");
+    assert.equal(inpulsa.baseTypeCn, "狂虐者束衣");
   });
 
   it("POST /api/parse 错误输入返回 500", async () => {
