@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "node --experimental-strip-types --import ./tools/register-hook.mjs src/cli.ts",
-    "test": "node --experimental-strip-types --experimental-test-isolation=none --import ./tools/register-hook.mjs --test tests/codec.test.ts tests/xml.test.ts tests/item-parser.test.ts tests/link.test.ts tests/stats.test.ts tests/query.test.ts tests/price.test.ts tests/category.test.ts tests/engine.test.ts tests/query-gem.test.ts tests/translation.test.ts",
+    "test": "node --experimental-strip-types --experimental-test-isolation=none --import ./tools/register-hook.mjs --test tests/codec.test.ts tests/xml.test.ts tests/item-parser.test.ts tests/link.test.ts tests/stats.test.ts tests/query.test.ts tests/price.test.ts tests/category.test.ts tests/engine.test.ts tests/query-gem.test.ts tests/translation.test.ts tests/server.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "engines": {

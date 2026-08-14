@@ -3,6 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { existsSync, readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { parseItemText } from "./item/parser.js";
+import { resolveInputToXml as resolveXml, selectItem } from "./input.js";
 import { displayName } from "./item/types.js";
 import { fetchChaosConversion } from "./pricer/ninja.js";
 import { decodePobCode, looksLikePobCode } from "./pob/codec.js";
@@ -56,38 +57,7 @@ price 选项:
   --no-cache                  禁用磁盘缓存
 `;
 
-async function resolveXml(input: string): Promise<{ xml: string; source: string }> {
-  const trimmed = input.trim();
-  if (looksLikePobCode(trimmed)) {
-    return { xml: decodePobCode(trimmed), source: "code" };
-  }
-  if (/^https?:\/\//i.test(trimmed) || isPobbUrl(trimmed)) {
-    return { xml: await fetchAndDecode(trimmed), source: "url:" + trimmed };
-  }
-  const content = await readFile(trimmed, "utf8").catch(() => {
-    throw new Error(`无法识别输入，也不是可读取的文件: ${trimmed}`);
-  });
-  const s = content.trim();
-  if (s.startsWith("<?xml") || s.startsWith("<PathOfBuilding") || s.startsWith("<Build")) {
-    return { xml: content, source: "file:" + trimmed };
-  }
-  if (looksLikePobCode(s)) return { xml: decodePobCode(s), source: "file:" + trimmed };
-  throw new Error(`文件内容无法识别: ${trimmed}`);
-}
 
-function selectItem(build: RawBuild, selector: string | undefined): RawItemSlot {
-  if (!selector) {
-    if (build.items.length === 1) return build.items[0];
-    throw new Error(`构建有 ${build.items.length} 件装备，请用 --item 指定（id / 序号 / 名称片段），或 --item-text 直接给物品文本`);
-  }
-  const byId = build.items.find((i) => i.id === selector);
-  if (byId) return byId;
-  const byIndex = build.items[Number(selector) - 1];
-  if (byIndex) return byIndex;
-  const byName = build.items.find((i) => i.rawText.includes(selector));
-  if (byName) return byName;
-  throw new Error(`找不到匹配 "${selector}" 的物品`);
-}
 
 function formatChaos(v: number | null): string {
   return v == null ? "-" : v.toFixed(1) + "c";
@@ -197,7 +167,6 @@ async function cmdPrice(input: string, values: Record<string, unknown>): Promise
     // 国服：status 必须用 any（online 会静默返回 0）；不传 sale_type（会致 0）
     statusAny: realm.id === "cn",
   });
-
   const delayMs = Number(values.delay ?? 2000);
   const rateWaitMs = Number(values["rate-wait"] ?? 30000);
   const dpopToken = await resolveCnAccessToken(values, cache);
@@ -268,10 +237,6 @@ async function cmdPrice(input: string, values: Record<string, unknown>): Promise
   );
 }
 
-function fmtChaos(v: number | null): string {
-  return v == null ? "-" : v.toFixed(1) + "c";
-}
-
 async function cmdBatch(input: string, values: Record<string, unknown>): Promise<void> {
   const { xml, source } = await resolveXml(input);
   const build = parseBuildXml(xml);
@@ -324,7 +289,7 @@ async function cmdBatch(input: string, values: Record<string, unknown>): Promise
   if (showProgress) process.stderr.write("\r" + " ".repeat(80) + "\r");
 
   console.log(`完成: ${summary.pricedCount} 项成功 / ${summary.failedCount} 项失败，耗时 ${(summary.durationMs / 1000).toFixed(1)}s`);
-  console.log(`总净值: 按最低价 ${fmtChaos(summary.totalChaosMin)} | 按中位价 ${fmtChaos(summary.totalChaosMedian)}`);
+  console.log(`总净值: 按最低价 ${formatChaos(summary.totalChaosMin)} | 按中位价 ${formatChaos(summary.totalChaosMedian)}`);
 
   const byCat = new Map<string, BatchItemResult[]>();
   for (const r of summary.results) {
@@ -335,10 +300,10 @@ async function cmdBatch(input: string, values: Record<string, unknown>): Promise
   for (const [cat, rows] of byCat) {
     const sub = rows.filter((r) => !r.error);
     const catMin = sub.reduce((s, r) => s + (r.minChaos ?? 0) * r.count, 0);
-    console.log(`\n【${cat}】${sub.length} 项，小计 ${fmtChaos(catMin)}`);
+    console.log(`\n【${cat}】${sub.length} 项，小计 ${formatChaos(catMin)}`);
     for (const r of rows) {
       const detail = r.gemLevel != null ? `lv${r.gemLevel}${r.gemQuality ? "/q" + r.gemQuality : ""}` : (r.baseType ?? "");
-      const price = r.error ? "失败" : `${fmtChaos(r.minChaos)}（中位 ${fmtChaos(r.medianChaos)}，${r.sampleCount} 样本，匹配 ${r.total}）`;
+      const price = r.error ? "失败" : `${formatChaos(r.minChaos)}（中位 ${formatChaos(r.medianChaos)}，${r.sampleCount} 样本，匹配 ${r.total}）`;
       console.log(`  ${r.name}${r.count > 1 ? " ×" + r.count : ""} [${detail}] → ${price}${r.error ? ": " + r.error : ""}`);
     }
   }
@@ -396,6 +361,12 @@ async function cmdParse(input: string, values: Record<string, unknown>): Promise
   console.log(renderBuildReport(build, parseItemText));
 }
 
+async function cmdServe(values: Record<string, unknown>): Promise<void> {
+  const { startServer } = await import("./server.js");
+  const port = Number(values.port ?? 8899);
+  await startServer(port);
+}
+
 async function main(): Promise<void> {
   const { positionals, values } = parseArgs({
     allowPositionals: true,
@@ -421,11 +392,16 @@ async function main(): Promise<void> {
       "no-gems": { type: "boolean", default: false },
       csv: { type: "string" },
       progress: { type: "boolean", default: false },
+      port: { type: "string" },
     },
   });
 
   const command = positionals[0];
   const input = positionals[1];
+  if (command === "serve") {
+    await cmdServe(values);
+    return;
+  }
   if (!command || !input) {
     console.error(USAGE);
     process.exit(1);

@@ -104,4 +104,28 @@ describe("BatchPriceEngine", () => {
     assert.match(failed!.error ?? "", /模拟失败/);
     assert.equal(summary.results.filter((r) => !r.error).length, 1);
   });
+
+  it("onlyIds 只查指定装备；onItem 逐项回调", async () => {
+    const data = new FakeData();
+    const client = new FakeClient();
+    const engine = new BatchPriceEngine(data, client, async () => new Map([["chaos", 1]]));
+    const seen: string[] = [];
+    const summary = await engine.run(build(), {
+      league: "Allflame",
+      mode: "loose",
+      limit: 2,
+      online: true,
+      maxMods: 8,
+      includeGems: false,
+      onlyIds: ["1"], // 只查第一件装备（唯一装，去重后 1 项）
+      onItem: (r) => seen.push(r.name),
+    });
+    // 只查 id=1 的装备：1 次 search + 1 次 fetch
+    assert.equal(client.searches, 1);
+    assert.equal(client.fetches, 1);
+    assert.equal(summary.results.length, 1);
+    assert.equal(summary.results[0].kind, "item");
+    assert.ok(seen.length >= 1, "onItem 应被调用");
+  });
+
 });
