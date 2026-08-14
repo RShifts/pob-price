@@ -1,0 +1,133 @@
+import type { ParsedItem } from "../item/types.js";
+import { StatMap, extractValues } from "./stats.js";
+
+export type PriceMode = "loose" | "strict";
+
+export interface QueryOptions {
+  mode?: PriceMode;
+  online?: boolean;
+  maxPrice?: number;
+  /** 词缀数量上限（默认 8，防止查询过大） */
+  maxMods?: number;
+  /** 交易类型（如 auto_buyout=交易一口价/立即购买） */
+  saleType?: string;
+  /** 国服必须用 any：国服后端对 status=online 静默返回 0 */
+  statusAny?: boolean;
+}
+
+export interface TradeQuery {
+  query: Record<string, unknown>;
+  sort: Record<string, string>;
+}
+
+/** 词缀重要性打分（数值越大越重要，用于 maxMods 截断时优先保留关键词缀）。 */
+export function scoreModText(modText: string): number {
+  const t = modText.toLowerCase();
+  let s = 1;
+  if (t.includes("maximum life")) s += 100;
+  if (t.includes("maximum energy shield") || t.includes("maximum mana")) s += 70;
+  if (t.includes("resistance")) s += 80;
+  if (t.includes("attack speed") || t.includes("cast speed") || t.includes("movement speed")) s += 60;
+  if (t.includes("critical")) s += 50;
+  if (t.includes("added") || t.includes("damage")) s += 40;
+  if (t.includes("strength") || t.includes("dexterity") || t.includes("intelligence")) s += 30;
+  if (t.includes("physical") || t.includes("cold") || t.includes("fire") || t.includes("lightning") || t.includes("chaos")) s += 20;
+  return s;
+}
+
+/** 词缀→stat 过滤项：取物品数值作为 min（同类/更好的物品才匹配）。 */
+function statFilter(
+  modText: string,
+  stat: { id: string; type: string },
+): { id: string; value: { min?: number; max?: number } } | null {
+  const values = extractValues(modText);
+  const value: { min?: number; max?: number } = {};
+  if (values.length >= 1) value.min = values[0];
+  if (values.length >= 2) value.max = values[1];
+  if (value.min === undefined) return null;
+  return { id: stat.id, value };
+}
+
+/**
+ * 把解析出的物品 → 官方市集查询 JSON。
+ *
+ * 策略：
+ * - 唯一装：name + type 过滤（不搜词缀，名字已经唯一）
+ * - 稀有/魔法：type + rarity + 词缀过滤（loose=显性+工艺+裂痕；strict=再加隐性）
+ * - 词缀过滤取物品自身数值作为 min，找到"同样或更好"的类似装备；
+ *   maxMods 截断前按 scoreModText 重要性排序，优先保留生命/抗性/速度等关键词缀
+ */
+export function buildSearchQuery(item: ParsedItem, statMap: StatMap, opts: QueryOptions = {}): TradeQuery {
+  const mode = opts.mode ?? "loose";
+  const maxMods = opts.maxMods ?? 8;
+
+  const typeFilters: Record<string, unknown> = {};
+  const rarity = item.rarity.toLowerCase();
+  if (["normal", "magic", "rare", "unique"].includes(rarity)) {
+    typeFilters.rarity = { option: rarity };
+  }
+
+  const tradeFilters: Record<string, unknown> = {};
+  if (opts.maxPrice != null) tradeFilters.price = { max: opts.maxPrice };
+  if (opts.saleType) tradeFilters.sale_type = { option: opts.saleType };
+  const statusOption = opts.statusAny || opts.online === false ? "any" : "online";
+  const query: Record<string, unknown> = {
+    status: { option: statusOption },
+    filters: {
+      type_filters: { filters: typeFilters },
+      trade_filters: { filters: tradeFilters },
+      misc_filters: { filters: {} },
+    },
+  };
+  if (item.rarity === "Unique" && item.name) query.name = { option: item.name };
+  if (item.baseType) query.type = { option: item.baseType };
+
+  if (item.rarity !== "Unique" && item.rarity !== "Normal") {
+    // 收集候选词缀（含重要性打分），排序后再匹配截断
+    const candidates: { modText: string; prefer?: string; score: number }[] = [];
+    const add = (mods: string[], prefer?: string) => {
+      for (const modText of mods) candidates.push({ modText, prefer, score: scoreModText(modText) });
+    };
+    add(item.explicitMods, "explicit");
+    add(item.craftMods, "crafted");
+    add(item.fracturedMods, "fractured");
+    if (mode === "strict") add(item.implicitMods, "implicit");
+    candidates.sort((a, b) => b.score - a.score);
+
+    const and: { id: string; value: { min?: number; max?: number } }[] = [];
+    for (const c of candidates) {
+      if (and.length >= maxMods) break;
+      const matches = statMap.match(c.modText, c.prefer);
+      if (matches.length === 0) continue;
+      // 每个词缀只取一个 stat（优先对应 type），避免 AND 叠加同名不同 type 的 id 导致无解
+      const f = statFilter(c.modText, matches[0]);
+      if (f) and.push(f);
+    }
+    if (and.length > 0) query.stats = [{ type: "and", filters: and }];
+  }
+
+  return { query, sort: { price: "asc" } };
+}
+
+/**
+ * 技能宝石查询：按宝石名 + 最低等级过滤（quality 官方 API 不支持过滤）。
+ */
+export function buildGemQuery(name: string, level: number, opts: { online?: boolean; saleType?: string; statusAny?: boolean } = {}): TradeQuery {
+  return {
+    query: {
+      status: { option: opts.statusAny || opts.online === false ? "any" : "online" },
+      type: { option: name },
+      filters: {
+        type_filters: { filters: {} },
+        misc_filters: { filters: level > 0 ? { gem_level: { min: level } } : {} },
+        trade_filters: { filters: opts.saleType ? { sale_type: { option: opts.saleType } } : {} },
+      },
+    },
+    sort: { price: "asc" },
+  };
+}
+
+/** 生成官方市集网页链接（可浏览器打开）。 */
+export function tradeSearchUrl(host: string, league: string, searchId: string): string {
+  return host + "/trade/search/" + encodeURIComponent(league) + "/" + searchId;
+}

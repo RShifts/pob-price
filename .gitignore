@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+
+# 敏感文件：国服登录 Cookie（含会话令牌），切勿提交
+*.cookie.txt
+*.cookie
+cn_cookie*
+
+# 运行时缓存与演示产物
+.cache/
+.npm-cache/
+*.csv

@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PathOfBuilding>
+	<Build level="1" targetVersion="3_0" banditNormal="None" bandit="Alira" banditMerciless="None" className="Scion" ascendClassName="Ascendant" mainSocketGroup="1" viewMode="IMPORT" banditCruel="None">
+		<PlayerStat stat="AverageHit" value="896.85004998047"/>
+		<PlayerStat stat="AverageDamage" value="896.85004998047"/>
+		<PlayerStat stat="Speed" value="-0.042571428571429"/>
+		<PlayerStat stat="Speed" value="-0.042571428571429"/>
+		<PlayerStat stat="PreEffectiveCritChance" value="5.75"/>
+		<PlayerStat stat="CritChance" value="11.169375"/>
+		<PlayerStat stat="CritMultiplier" value="1.49"/>
+		<PlayerStat stat="HitChance" value="100"/>
+		<PlayerStat stat="TotalDPS" value="-38.180187842026"/>
+		<PlayerStat stat="TotalDot" value="0"/>
+		<PlayerStat stat="WithPoisonDPS" value="-38.180187842026"/>
+		<PlayerStat stat="ManaCost" value="23"/>
+		<PlayerStat stat="Str" value="50"/>
+		<PlayerStat stat="ReqStr" value="98"/>
+		<PlayerStat stat="Dex" value="20"/>
+		<PlayerStat stat="ReqDex" value="111"/>
+		<PlayerStat stat="Int" value="40"/>
+		<PlayerStat stat="ReqInt" value="155"/>
+		<PlayerStat stat="Life" value="163"/>
+		<PlayerStat stat="Spec:LifeInc" value="0"/>
+		<PlayerStat stat="LifeUnreserved" value="163"/>
+		<PlayerStat stat="LifeUnreservedPercent" value="100"/>
+		<PlayerStat stat="LifeRegen" value="0"/>
+		<PlayerStat stat="LifeLeechGainRate" value="-0"/>
+		<PlayerStat stat="Mana" value="60"/>
+		<PlayerStat stat="Spec:ManaInc" value="0"/>
+		<PlayerStat stat="ManaUnreserved" value="15"/>
+		<PlayerStat stat="ManaUnreservedPercent" value="25"/>
+		<PlayerStat stat="ManaRegen" value="0"/>
+		<PlayerStat stat="ManaLeechGainRate" value="-0"/>
+		<PlayerStat stat="EnergyShield" value="114"/>
+		<PlayerStat stat="Spec:EnergyShieldInc" value="0"/>
+		<PlayerStat stat="EnergyShieldRegen" value="0"/>
+		<PlayerStat stat="EnergyShieldLeechGainRate" value="-0"/>
+		<PlayerStat stat="Evasion" value="450"/>
+		<PlayerStat stat="Spec:EvasionInc" value="0"/>
+		<PlayerStat stat="MeleeEvadeChance" value="83"/>
+		<PlayerStat stat="MeleeEvadeChance" value="83"/>
+		<PlayerStat stat="ProjectileEvadeChance" value="83"/>
+		<PlayerStat stat="Armour" value="0"/>
+		<PlayerStat stat="Spec:ArmourInc" value="0"/>
+		<PlayerStat stat="PhysicalDamageReduction" value="14"/>
+		<PlayerStat stat="EffectiveMovementSpeedMod" value="-0.0314"/>
+		<PlayerStat stat="BlockChance" value="0"/>
+		<PlayerStat stat="SpellBlockChance" value="0"/>
+		<PlayerStat stat="AttackDodgeChance" value="0"/>
+		<PlayerStat stat="SpellDodgeChance" value="0"/>
+		<PlayerStat stat="FireResist" value="-86"/>
+		<PlayerStat stat="ColdResist" value="-86"/>
+		<PlayerStat stat="LightningResist" value="-86"/>
+		<PlayerStat stat="ChaosResist" value="-80"/>
+		<PlayerStat stat="FireResistOverCap" value="0"/>
+		<PlayerStat stat="ColdResistOverCap" value="0"/>
+		<PlayerStat stat="LightningResistOverCap" value="0"/>
+		<PlayerStat stat="ChaosResistOverCap" value="0"/>
+		<PlayerStat stat="PowerCharges" value="1"/>
+		<PlayerStat stat="PowerChargesMax" value="3"/>
+		<PlayerStat stat="FrenzyCharges" value="1"/>
+		<PlayerStat stat="FrenzyChargesMax" value="3"/>
+		<PlayerStat stat="EnduranceCharges" value="1"/>
+		<PlayerStat stat="EnduranceChargesMax" value="3"/>
+	</Build>
+	<Import/>
+	<Calcs>
+		<Input name="misc_buffMode" string="EFFECTIVE"/>
+		<Input name="skill_number" number="1"/>
+		<Section collapsed="false" id="SkillSelect"/>
+		<Section collapsed="false" id="HitDamage"/>
+		<Section collapsed="false" id="Dot"/>
+		<Section collapsed="false" id="Speed"/>
+		<Section collapsed="false" id="Crit"/>
+		<Section collapsed="false" id="HitChance"/>
+		<Section collapsed="false" id="SkillTypeStats"/>
+		<Section collapsed="false" id="Bleed"/>
+		<Section collapsed="false" id="Poison"/>
+		<Section collapsed="false" id="Ignite"/>
+		<Section collapsed="false" id="Decay"/>
+		<Section collapsed="false" id="LeechGain"/>
+		<Section collapsed="false" id="MiscEffects"/>
+		<Section collapsed="false" id="Attributes"/>
+		<Section collapsed="false" id="Life"/>
+		<Section collapsed="false" id="Mana"/>
+		<Section collapsed="false" id="EnergyShield"/>
+		<Section collapsed="false" id="Armour"/>
+		<Section collapsed="false" id="Evasion"/>
+		<Section collapsed="false" id="Resist"/>
+		<Section collapsed="false" id="DamageTaken"/>
+		<Section collapsed="false" id="MiscDefences"/>
+	</Calcs>
+	<Skills defaultGemQuality="nil" defaultGemLevel="nil" sortGemsByDPS="true">
+		<Skill mainActiveSkillCalcs="1" label="Test label." enabled="true" slot="Body Armour" mainActiveSkill="1">
+			<Gem enableGlobal2="false" quality="1" level="20" gemId="Metadata/Items/Gems/SkillGemArc" skillId="Arc" enableGlobal1="true" enabled="true" nameSpec="Arc" skillMinion="SummonedPhantasm"/>
+			<Gem enableGlobal2="false" quality="2" level="20" gemId="Metadata/Items/Gems/SupportGemCurseOnHit" skillId="SupportCurseOnHit" enableGlobal1="true" enabled="true" nameSpec="Curse On Hit"/>
+			<Gem enableGlobal2="false" quality="3" level="20" gemId="Metadata/Items/Gems/SkillGemConductivity" skillId="Conductivity" enableGlobal1="true" enabled="true" nameSpec="Conductivity"/>
+		</Skill>
+		<Skill mainActiveSkillCalcs="1" label="" enabled="true" slot="Body Armour" mainActiveSkill="1">
+			<Gem enableGlobal2="false" skillMinionSkillCalcs="1" skillMinionCalcs="AxisEliteSoldierHeraldOfLight" quality="0" level="20" gemId="Metadata/Items/Gems/SkillGemHeraldOfAsh" skillId="HeraldOfAsh" skillMinionSkill="1" enableGlobal1="true" enabled="true" nameSpec="Herald of Ash" skillMinion="HeraldOfAgonySpiderPlated"/>
+			<Gem enableGlobal2="false" skillMinionSkillCalcs="1" quality="0" level="20" gemId="Metadata/Items/Gems/SkillGemHeraldOfIce" skillId="HeraldOfIce" skillMinionSkill="1" enableGlobal1="true" enabled="true" nameSpec="Herald of Ice" skillMinion="SummonedPhantasm"/>
+			<Gem enableGlobal2="false" skillMinionSkillCalcs="1" quality="0" level="20" gemId="Metadata/Items/Gems/SkillGemHeraldOfThunder" skillId="HeraldOfThunder" skillMinionSkill="1" enableGlobal1="true" enabled="true" nameSpec="Herald of Thunder" skillMinion="AxisEliteSoldierHeraldOfLight"/>
+		</Skill>
+		<Skill source="Item:1:Abberath&apos;s Hooves, Goathide Boots" mainActiveSkillCalcs="1" label="" enabled="true" slot="Boots" mainActiveSkill="1">
+			<Gem enableGlobal2="false" quality="0" level="7" skillId="RepeatingShockwave" enableGlobal1="true" enabled="true" nameSpec="Abberath&apos;s Fury"/>
+			<Gem enableGlobal2="nil" quality="0" level="20" gemId="Metadata/Items/Gems/SupportGemAddedColdDamage" skillId="SupportAddedColdDamage" skillPart="1" enableGlobal1="true" enabled="true" nameSpec="Added Cold Damage" skillMinion="SummonedChaosGolem"/>
+			<Gem enableGlobal2="nil" quality="0" level="20" gemId="Metadata/Items/Gems/SupportGemAddedLightningDamage" skillId="SupportAddedLightningDamage" enableGlobal1="true" enabled="true" nameSpec="Added Lightning Damage"/>
+			<Gem enableGlobal2="nil" quality="0" level="20" gemId="Metadata/Items/Gems/SupportGemDamageAgainstChilled" skillId="SupportDamageAgainstChilled" enableGlobal1="true" enabled="true" nameSpec="Hypothermia"/>
+			<Gem enableGlobal2="nil" quality="0" level="20" gemId="Metadata/Items/Gems/SupportGemConcentratedEffect" skillId="SupportConcentratedEffect" enableGlobal1="true" enabled="true" nameSpec="Concentrated Effect"/>
+		</Skill>
+		<Skill mainActiveSkillCalcs="nil" label="" enabled="true" slot="Boots" mainActiveSkill="nil">
+			<Gem enableGlobal2="nil" quality="0" level="20" gemId="Metadata/Items/Gems/SupportGemAddedColdDamage" skillId="SupportAddedColdDamage" skillPart="1" enableGlobal1="true" enabled="true" nameSpec="Added Cold Damage" skillMinion="SummonedChaosGolem"/>
+			<Gem enableGlobal2="nil" quality="0" level="20" gemId="Metadata/Items/Gems/SupportGemAddedLightningDamage" skillId="SupportAddedLightningDamage" enableGlobal1="true" enabled="true" nameSpec="Added Lightning Damage"/>
+			<Gem enableGlobal2="nil" quality="0" level="20" gemId="Metadata/Items/Gems/SupportGemDamageAgainstChilled" skillId="SupportDamageAgainstChilled" enableGlobal1="true" enabled="true" nameSpec="Hypothermia"/>
+			<Gem enableGlobal2="nil" quality="0" level="20" gemId="Metadata/Items/Gems/SupportGemConcentratedEffect" skillId="SupportConcentratedEffect" enableGlobal1="true" enabled="true" nameSpec="Concentrated Effect"/>
+		</Skill>
+	</Skills>
+	<Tree activeSpec="1">
+		<Spec treeVersion="3_8">
+			<URL>
+				https://www.pathofexile.com/passive-skill-tree/AAAABAABAJitGFbaYij62E1odILHlKD56A==
+			</URL>
+			<Sockets>
+				<Socket nodeId="7960" itemId="0"/>
+				<Socket nodeId="32763" itemId="0"/>
+				<Socket nodeId="28475" itemId="0"/>
+				<Socket nodeId="26196" itemId="0"/>
+				<Socket nodeId="36634" itemId="0"/>
+				<Socket nodeId="33989" itemId="0"/>
+				<Socket nodeId="21984" itemId="0"/>
+				<Socket nodeId="46882" itemId="0"/>
+				<Socket nodeId="61419" itemId="0"/>
+				<Socket nodeId="54127" itemId="0"/>
+				<Socket nodeId="6230" itemId="0"/>
+				<Socket nodeId="55190" itemId="0"/>
+				<Socket nodeId="48768" itemId="0"/>
+				<Socket nodeId="2491" itemId="0"/>
+				<Socket nodeId="61834" itemId="0"/>
+				<Socket nodeId="41263" itemId="0"/>
+				<Socket nodeId="60735" itemId="0"/>
+				<Socket nodeId="33631" itemId="0"/>
+				<Socket nodeId="31683" itemId="0"/>
+				<Socket nodeId="34483" itemId="0"/>
+				<Socket nodeId="26725" itemId="0"/>
+			</Sockets>
+		</Spec>
+	</Tree>
+	<Notes>
+		Test string.
+	</Notes>
+	<TreeView searchStr="" zoomY="79.78699903978" showHeatMap="false" zoomLevel="5" showStatDifferences="true" zoomX="-429.78606210562"/>
+	<Items activeItemSet="1" useSecondWeaponSet="true">
+		<Item variant="2" id="2">
+			Rarity: UNIQUE
+Inpulsa&apos;s Broken Heart
+Sadist Garb
+Shaper Item
+Variant: Pre 3.5.0
+Variant: Current
+Selected Variant: 2
+Quality: 20
+Sockets: R-G-B B-B-B
+LevelReq: 68
+Implicits: 2
+{range:0.5}(40-50)% increased Damage
+{range:0.5}(4-6)% increased maximum Life
+{range:0.5}+(60-80) to maximum Life
+{range:0.5}(20-50)% increased Damage if you have Shocked an Enemy Recently
+{range:0.5}(25-40)% increased Effect of Shock
+Unaffected by Shock
+{variant:1}Shocked Enemies you Kill Explode, dealing (5-10)% of
+{variant:2}Shocked Enemies you Kill Explode, dealing 5% of
+their Maximum Life as Lightning Damage which cannot Shock
+Corrupted
+			<ModRange range="0.5" id="1"/>
+			<ModRange range="0.5" id="2"/>
+			<ModRange range="0.5" id="3"/>
+			<ModRange range="0.5" id="4"/>
+			<ModRange range="0.5" id="5"/>
+		</Item>
+		<Item id="1">
+			Rarity: UNIQUE
+Abberath&apos;s Hooves
+Goathide Boots
+Quality: 20
+Sockets: G-G-G-G
+LevelReq: 12
+Implicits: 0
+{range:0.5}+(20-30) to Strength
+15% increased Movement Speed
+{range:0.5}(6-10)% chance to Ignite
+Ignite a nearby Enemy on Killing an Ignited Enemy
+Casts level 7 Abberath&apos;s Fury when equipped
+1% increased Fire Damage per 20 Strength
+Burning Hoofprints
+			<ModRange range="0.5" id="1"/>
+			<ModRange range="0.5" id="3"/>
+		</Item>
+		<Slot name="Body Armour" itemId="2"/>
+		<Slot name="Boots" itemId="1"/>
+		<ItemSet useSecondWeaponSet="true" id="1">
+			<Slot name="Gloves" itemId="0"/>
+			<Slot name="Weapon 1" itemId="0"/>
+			<Slot name="Weapon 2Swap Abyssal Socket 2" itemId="0"/>
+			<Slot name="Belt Abyssal Socket 2" itemId="0"/>
+			<Slot name="Flask 3" itemId="0"/>
+			<Slot name="Body Armour Abyssal Socket 2" itemId="0"/>
+			<Slot name="Amulet" itemId="0"/>
+			<Slot name="Flask 1" itemId="0"/>
+			<Slot name="Weapon 2Swap Abyssal Socket 1" itemId="0"/>
+			<Slot name="Flask 5" itemId="0"/>
+			<Slot name="Belt Abyssal Socket 1" itemId="0"/>
+			<Slot name="Flask 2" itemId="0"/>
+			<Slot name="Helmet Abyssal Socket 2" itemId="0"/>
+			<Slot name="Weapon 2 Swap" itemId="0"/>
+			<Slot name="Weapon 1 Abyssal Socket 1" itemId="0"/>
+			<Slot name="Weapon 2" itemId="0"/>
+			<Slot name="Body Armour" itemId="2"/>
+			<Slot name="Flask 4" itemId="0"/>
+			<Slot name="Weapon 1 Abyssal Socket 2" itemId="0"/>
+			<Slot name="Weapon 2 Abyssal Socket 2" itemId="0"/>
+			<Slot name="Weapon 1 Swap" itemId="0"/>
+			<Slot name="Ring 2" itemId="0"/>
+			<Slot name="Boots Abyssal Socket 2" itemId="0"/>
+			<Slot name="Gloves Abyssal Socket 2" itemId="0"/>
+			<Slot name="Body Armour Abyssal Socket 1" itemId="0"/>
+			<Slot name="Gloves Abyssal Socket 1" itemId="0"/>
+			<Slot name="Helmet Abyssal Socket 1" itemId="0"/>
+			<Slot name="Weapon 2 Abyssal Socket 1" itemId="0"/>
+			<Slot name="Boots" itemId="1"/>
+			<Slot name="Weapon 1Swap Abyssal Socket 1" itemId="0"/>
+			<Slot name="Ring 1" itemId="0"/>
+			<Slot name="Weapon 1Swap Abyssal Socket 2" itemId="0"/>
+			<Slot name="Helmet" itemId="0"/>
+			<Slot name="Boots Abyssal Socket 1" itemId="0"/>
+			<Slot name="Belt" itemId="0"/>
+		</ItemSet>
+	</Items>
+	<Config>
+		<Input name="buffFortify" boolean="true"/>
+		<Input name="conditionOnConsecratedGround" boolean="true"/>
+		<Input name="conditionEnemyMoving" boolean="true"/>
+		<Input name="playerGainsReducedFlaskCharges" number="30"/>
+		<Input name="playerCannotLeech" boolean="true"/>
+		<Input name="enemyConditionHitByColdDamage" boolean="true"/>
+		<Input name="useFrenzyCharges" boolean="true"/>
+		<Input name="conditionEnemyChilled" boolean="true"/>
+		<Input name="playerHasLessLifeESRecovery" number="20"/>
+		<Input name="useEnduranceCharges" boolean="true"/>
+		<Input name="EEIgnoreHitDamage" boolean="true"/>
+		<Input name="playerCursedWithTemporalChains" number="1"/>
+		<Input name="playerCursedWithPoachersMark" number="1"/>
+		<Input name="overrideEnduranceCharges" number="1"/>
+		<Input name="enemyChaosResist" number="1"/>
+		<Input name="enemyIsBoss" string="SHAPER"/>
+		<Input name="conditionChilled" boolean="true"/>
+		<Input name="buffAdrenaline" boolean="true"/>
+		<Input name="conditionEnemyBlinded" boolean="true"/>
+		<Input name="playerCursedWithAssassinsMark" number="1"/>
+		<Input name="playerHasLessAreaOfEffect" number="15"/>
+		<Input name="buffUnholyMight" boolean="true"/>
+		<Input name="playerCursedWithPunishment" number="1"/>
+		<Input name="enemyHasPhysicalReduction" number="20"/>
+		<Input name="enemyCanAvoidPoisonBlindBleed" number="25"/>
+		<Input name="playerHasPointBlank" boolean="true"/>
+		<Input name="playerCursedWithProjectileWeakness" number="1"/>
+		<Input name="playerCursedWithDespair" number="1"/>
+		<Input name="playerHasLessArmourandBlock" string="LOW"/>
+		<Input name="overrideFrenzyCharges" number="1"/>
+		<Input name="conditionEnemyCoveredInAsh" boolean="true"/>
+		<Input name="enemyLevel" number="1"/>
+		<Input name="overridePowerCharges" number="1"/>
+		<Input name="enemyColdResist" number="1"/>
+		<Input name="playerHasMinusMaxResist" number="1"/>
+		<Input name="enemyLightningResist" number="1"/>
+		<Input name="multiplierPoisonOnEnemy" number="1"/>
+		<Input name="playerHasElementalEquilibrium" boolean="true"/>
+		<Input name="conditionEnemyFrozen" boolean="true"/>
+		<Input name="enemyHasResistances" string="LOW"/>
+		<Input name="enemyConditionHitByLightningDamage" boolean="true"/>
+		<Input name="playerCursedWithConductivity" number="1"/>
+		<Input name="buffOnslaught" boolean="true"/>
+		<Input name="playerCursedWithFrostbite" number="1"/>
+		<Input name="conditionFullLife" boolean="true"/>
+		<Input name="playerCursedWithEnfeeble" number="1"/>
+		<Input name="critChanceLucky" boolean="true"/>
+		<Input name="playerCursedWithWarlordsMark" number="1"/>
+		<Input name="conditionShocked" boolean="true"/>
+		<Input name="conditionEnemyBleeding" boolean="true"/>
+		<Input name="enemyIsHexproof" boolean="true"/>
+		<Input name="skillChainCount" number="1"/>
+		<Input name="playerCannotRegenLifeManaEnergyShield" boolean="true"/>
+		<Input name="buffTailwind" boolean="true"/>
+		<Input name="enemyHasIncreasedAccuracy" number="30"/>
+		<Input name="enemyConditionHitByFireDamage" boolean="true"/>
+		<Input name="playerCursedWithVulnerability" number="1"/>
+		<Input name="enemyTakesReducedExtraCritDamage" number="1"/>
+		<Input name="enemyHasLessCurseEffectOnSelf" number="25"/>
+		<Input name="conditionFrozen" boolean="true"/>
+		<Input name="playerCursedWithFlammability" number="1"/>
+		<Input name="conditionShockedEnemyRecently" boolean="true"/>
+		<Input name="usePowerCharges" boolean="true"/>
+		<Input name="enemyPhysicalReduction" number="1"/>
+		<Input name="detonateDeadCorpseLife" number="1"/>
+		<Input name="enemyPhysicalHit" number="1"/>
+		<Input name="conditionEnemyMaimed" boolean="true"/>
+		<Input name="conditionEnemyIntimidated" boolean="true"/>
+		<Input name="enemyCanAvoidStatusAilment" number="30"/>
+		<Input name="playerCursedWithElementalWeakness" number="1"/>
+		<Input name="conditionEnemyIgnited" boolean="true"/>
+		<Input name="enemyFireResist" number="1"/>
+		<Input name="conditionEnemyShocked" boolean="true"/>
+		<Input name="conditionEnemyBurning" boolean="true"/>
+	</Config>
+</PathOfBuilding>

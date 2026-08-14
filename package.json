@@ -1,0 +1,23 @@
+{
+  "name": "pob-price",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "POB 批量查价工具：从 POB Code/链接解析构建（装备/药剂/宝石/珠宝）并批量查询市集价格",
+  "bin": {
+    "pob-price": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "node --experimental-strip-types --import ./tools/register-hook.mjs src/cli.ts",
+    "test": "node --experimental-strip-types --experimental-test-isolation=none --import ./tools/register-hook.mjs --test tests/codec.test.ts tests/xml.test.ts tests/item-parser.test.ts tests/link.test.ts tests/stats.test.ts tests/query.test.ts tests/price.test.ts tests/category.test.ts tests/engine.test.ts tests/query-gem.test.ts tests/translation.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=22.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2"
+  }
+}
