@@ -93,7 +93,7 @@ async function runPriceJob(job: PriceJob, body: Record<string, unknown>): Promis
   const servers = (body.servers as string[] | undefined) ?? ["intl", "cn"];
   const { xml } = await resolveInputToXml(String(body.input));
   const build = parseBuildXml(xml);
-  const mode = (body.mode as string) ?? "loose";
+  const deviationPct = Number(body.deviationPct ?? 10);
   const limit = Number(body.limit ?? 3);
   const onlyIds = Array.isArray(body.onlyIds) ? (body.onlyIds as string[]) : undefined;
   const includeGems = body.includeGems !== false;
@@ -106,12 +106,13 @@ async function runPriceJob(job: PriceJob, body: Record<string, unknown>): Promis
     const realm = realmOf(sid);
     const cache = new DiskCache();
     const league = (body.league as Record<string, string> | undefined)?.[sid] ?? (await new TradeData(realm.host, cache).pickLeague());
-    const client = new TradeClient(realm.host, { cookie: sid === "cn" ? (body.cookie as string | undefined) : undefined, cache });
+    const delayMs = Number(body.delay ?? 3000);
+    const client = new TradeClient(realm.host, { rateLimitMs: delayMs, cookie: sid === "cn" ? (body.cookie as string | undefined) : undefined, cache });
     const engine = new BatchPriceEngine(new TradeData(), client);
     const partial: BatchItemResult[] = [];
     const summary = await engine.run(build, {
       league,
-      mode: mode === "strict" ? "strict" : "loose",
+      deviationPct,
       limit,
       online: body.online !== false,
       maxMods: 8,

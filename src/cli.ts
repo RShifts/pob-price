@@ -45,7 +45,7 @@ price 选项:
   --item <id|序号|名称片段>   指定查价物品（构建有多件时必填）
   --item-text <文本>          直接给物品文本查价（跳过构建解析）
   --league <名称>             联赛，默认自动选当前挑战联赛
-  --mode loose|strict         词缀匹配宽松度（默认 loose）
+  --deviation <0-50>          匹配偏差百分比（默认 10）：词缀 min 值按此放宽，越大越宽松
   --limit <n>                 取前 n 个挂牌（默认 5）
   --delay <ms>                调用间最小间隔（默认 2000）
   --rate-wait <ms>            429 限流累计等待上限（默认 30000，超限快速失败）
@@ -161,7 +161,7 @@ async function cmdPrice(input: string, values: Record<string, unknown>): Promise
   parsedItem = localizeItem(parsedItem, realm.id);
 
   const query = buildSearchQuery(parsedItem, statMap, {
-    mode: mode === "strict" ? "strict" : "loose",
+    deviationPct: Number(values.deviation ?? 10),
     online,
     maxMods: 8,
     // 国服：status 必须用 any（online 会静默返回 0）；不传 sale_type（会致 0）
@@ -264,18 +264,18 @@ async function cmdBatch(input: string, values: Record<string, unknown>): Promise
   // stat id 跨服通用：引擎的词缀匹配始终用国际服英文词缀表（国服 data/stats 是中文文本）
   const engine = new BatchPriceEngine(new TradeData(), client);
 
-  const mode = (values.mode as string) === "strict" ? "strict" : "loose";
+  const deviation = Number(values.deviation ?? 10);
   const limit = Number(values.limit ?? 3);
   const maxMods = Number(values["max-mods"] ?? 8);
   const includeGems = values["no-gems"] !== true;
   const showProgress = values.progress === true && values.json !== true;
   const gemCount = build.skills.reduce((n, s) => n + s.gems.length, 0);
 
-  console.log(`批量查价(${realm.id === "cn" ? "国服" : "国际服"}): ${build.items.length} 件装备/药剂/珠宝 + ${includeGems ? gemCount : 0} 颗宝石 | 联赛 ${league} | 模式 ${mode} | 来源 ${source}`);
+  console.log(`批量查价(${realm.id === "cn" ? "国服" : "国际服"}): ${build.items.length} 件装备/药剂/珠宝 + ${includeGems ? gemCount : 0} 颗宝石 | 联赛 ${league} | 偏差 ${deviation}% | 来源 ${source}`);
 
   const summary = await engine.run(build, {
     league,
-    mode,
+    deviationPct: deviation,
     limit,
     online: values.offline !== true,
     maxMods,
@@ -377,7 +377,7 @@ async function main(): Promise<void> {
       item: { type: "string" },
       "item-text": { type: "string" },
       league: { type: "string" },
-      mode: { type: "string" },
+      deviation: { type: "string" },
       limit: { type: "string" },
       delay: { type: "string" },
       "rate-wait": { type: "string" },

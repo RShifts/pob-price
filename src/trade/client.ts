@@ -30,7 +30,7 @@ export class TradeClient {
 
   constructor(host = "https://www.pathofexile.com", opts: TradeClientOptions = {}) {
     this.host = host;
-    this.limiter = new RateLimiter(opts.rateLimitMs ?? 2000);
+    this.limiter = new RateLimiter(opts.rateLimitMs ?? 3000);
     this.cache = opts.cache === undefined ? new DiskCache() : opts.cache;
     this.maxRateWaitMs = opts.maxRateWaitMs ?? 30_000;
     this.cookie = opts.cookie;

@@ -78,10 +78,12 @@
         <input type="password" id="cookie" placeholder="POESESSID=...; POETOKEN=...（浏览器 localStorage 已缓存会自动填入）">
         <button class="small secondary" onclick="clearCookieCache()">清除缓存</button>
       </div>
-      <label for="mode">匹配模式</label>
-      <select id="mode"><option value="loose">宽松 (loose)</option><option value="strict">精确 (strict)</option></select>
+      <label for="deviation">匹配偏差（%）：词缀数值按此放宽，越大越宽松</label>
+      <input type="number" id="deviation" value="10" min="0" max="50" style="width:80px">
       <label for="limit">每个物品取前 N 个挂牌</label>
       <input type="number" id="limit" value="3" min="1" max="10" style="width:70px">
+      <label for="delay">请求间隔（ms，防限流）</label>
+      <input type="number" id="delay" value="3000" min="1000" step="500" style="width:90px">
       <label for="online">仅在线</label>
       <input type="checkbox" id="online" checked style="width:auto">
     </div>
@@ -137,7 +139,7 @@
 
 <script>
 const $ = (id) => document.getElementById(id);
-const state = { items: [], gems: [], jobs: { intl: null, cn: null }, timers: { intl: null, cn: null }, pendingServer: null };
+const state = { items: [], gems: [], jobs: { intl: null, cn: null }, timers: { intl: null, cn: null }, results: { intl: [], cn: [] }, summaries: { intl: null, cn: null } };
 
 async function api(url, opts) {
   const r = await fetch(url, opts || {});
@@ -244,8 +246,9 @@ async function runPrice(server) {
     servers: [server],
     onlyIds: ids.length ? ids : undefined,
     includeGems: ids.length ? false : true,
-    mode: $("mode").value,
+    deviationPct: Number($("deviation").value) || 0,
     limit: Number($("limit").value) || 3,
+    delay: Number($("delay").value) || 3000,
     online: $("online").checked,
     cookie: server === "cn" ? cachedCookie() || undefined : undefined,
     league: { [server]: (server === "intl" ? $("leagueIntl").value : $("leagueCn").value) || undefined },
@@ -268,14 +271,25 @@ function showProgress(done, total, label) {
   $("progressText").textContent = label;
 }
 
-function startPoll(server) {
+function startPoll(server, isRetry) {
   if (state.timers[server]) clearInterval(state.timers[server]);
   state.timers[server] = setInterval(async () => {
     try {
       const j = await api("/api/price?jobId=" + encodeURIComponent(state.jobs[server]));
       const label = (server === "intl" ? "国际服" : "国服") + " " + j.progress.label;
       showProgress(j.progress.done, j.progress.total, label + "（" + j.progress.done + "/" + j.progress.total + "）");
-      renderPrice(server, j.partial[server], j[server]);
+      if (isRetry) {
+        // 重试：把结果按 key 合并进已有列表
+        const rows = j.partial[server] || [];
+        if (rows.length) {
+          const merged = (state.results[server] || []).filter((x) => x.key !== rows[0].key);
+          merged.push(rows[0]);
+          state.results[server] = merged;
+          renderPrice(server);
+        }
+      } else {
+        renderPrice(server, j.partial[server], j[server]);
+      }
       if (j.status === "done" || j.status === "error") {
         clearInterval(state.timers[server]); state.timers[server] = null;
         $("price" + (server === "intl" ? "Intl" : "Cn") + "Btn").disabled = false;
@@ -302,24 +316,56 @@ function checkCnAuthFailure(server, j) {
 }
 
 function renderPrice(server, rows, summary) {
-  if (!rows) return;
+  if (rows) state.results[server] = rows;
+  if (summary) state.summaries[server] = summary;
+  const merged = state.results[server] || [];
   const tbody = $(server + "Table").querySelector("tbody");
   tbody.innerHTML = "";
-  for (const r of rows) {
+  for (const r of merged) {
     const tr = document.createElement("tr");
     if (r.error) tr.className = "err";
-    tr.innerHTML = `<td>${esc(r.name)}${r.gemLevel != null ? ' <span class="badge">lv' + r.gemLevel + '</span>' : ""}${r.count > 1 ? " ×" + r.count : ""}</td>
+    const retry = (r.error && r.kind === "item" && r.ids && r.ids.length)
+      ? ` <button class="small secondary" onclick="retryItem('${server}', '${r.ids[0]}', '${escKey(r.key)}')">重试</button>`
+      : "";
+    tr.innerHTML = `<td>${esc(r.name)}${r.gemLevel != null ? ' <span class="badge">lv' + r.gemLevel + '</span>' : ""}${r.count > 1 ? " ×" + r.count : ""}${retry}</td>
       <td class="num">${fmt(r.minChaos)}</td><td class="num">${fmt(r.medianChaos)}</td><td class="num">${fmt(r.avgChaos)}</td>
       <td class="num">${r.sampleCount}</td><td class="num">${r.total}</td>
-      <td>${r.url ? '<a href="' + esc(r.url) + '" target="_blank">市集</a>' : (r.error ? esc(r.error.slice(0, 40)) : "")}</td>`;
+      <td>${r.url ? '<a href="' + esc(r.url) + '" target="_blank">市集</a>' : (r.error ? esc(r.error.slice(0, 30)) : "")}</td>`;
     tbody.appendChild(tr);
   }
-  if (summary) {
-    $(server + "Summary").textContent = `${summary.pricedCount} 项成功 / ${summary.failedCount} 项失败，耗时 ${(summary.durationMs / 1000).toFixed(1)}s，联赛 ${summary.league}`;
-    $(server + "Total").textContent = `总净值：最低 ${fmt(summary.totalChaosMin)} | 中位 ${fmt(summary.totalChaosMedian)}`;
+  const s = state.summaries[server];
+  if (s) {
+    $(server + "Summary").textContent = `${s.pricedCount} 项成功 / ${s.failedCount} 项失败，耗时 ${(s.durationMs / 1000).toFixed(1)}s，联赛 ${s.league}`;
+    $(server + "Total").textContent = `总净值：最低 ${fmt(s.totalChaosMin)} | 中位 ${fmt(s.totalChaosMedian)}`;
   }
   $("resultCols").style.display = "grid";
 }
+
+async function retryItem(server, itemId) {
+  const input = $("input").value.trim();
+  const body = {
+    input,
+    servers: [server],
+    onlyIds: [itemId],
+    includeGems: false,
+    deviationPct: Number($("deviation").value) || 0,
+    limit: Number($("limit").value) || 3,
+    delay: Number($("delay").value) || 3000,
+    online: $("online").checked,
+    cookie: server === "cn" ? cachedCookie() || undefined : undefined,
+    league: { [server]: (server === "intl" ? $("leagueIntl").value : $("leagueCn").value) || undefined },
+  };
+  showProgress(0, 1, (server === "intl" ? "国际服" : "国服") + " 重试中...");
+  try {
+    const { jobId } = await api("/api/price", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    state.jobs[server] = jobId;
+    startPoll(server, true);
+  } catch (e) {
+    $("priceError").textContent = "重试启动失败: " + e.message;
+  }
+}
+
+function escKey(s) { return String(s).replace(/'/g, "\\'").replace(/"/g, "&quot;"); }
 
 function fmt(v) { return v == null ? "-" : v.toFixed(1) + "c"; }
 function esc(s) { return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }

@@ -6,7 +6,6 @@ import { localizeGemName, localizeItem, REALMS } from "../trade/realms.js";
 import type { RealmId } from "../trade/realms.js";
 import { aggregatePrices, toPriceSamples } from "../trade/price.js";
 import { buildGemQuery, buildSearchQuery, tradeSearchUrl } from "../trade/query.js";
-import type { PriceMode } from "../trade/query.js";
 import { StatMap } from "../trade/stats.js";
 import type { Listing, SearchResponse, StatEntry } from "../trade/types.js";
 import { fetchChaosConversion } from "../pricer/ninja.js";
@@ -24,7 +23,8 @@ export interface ClientProvider {
 
 export interface BatchOptions {
   league: string;
-  mode: PriceMode;
+  /** 匹配偏差百分比（0-50），词缀 min 值按此放宽 */
+  deviationPct?: number;
   /** 每件取前 n 个挂牌 */
   limit: number;
   online: boolean;
@@ -48,6 +48,8 @@ export interface BatchItemResult {
   kind: "item" | "gem";
   /** 去重键 */
   key: string;
+  /** 对应的装备槽位 id（用于 UI 单件重试） */
+  ids?: string[];
   /** 同键数量（同款多件时价格×数量） */
   count: number;
   category: string;
@@ -148,11 +150,12 @@ export class BatchPriceEngine {
     if (entry.kind === "item") {
       const parsed = localizeItem(parseItemText(entry.slot.rawText), opts.realm ?? "intl");
       // 国服：status 必须 any（online 会静默返回 0）；sale_type 会致 0，不传
-      const query = buildSearchQuery(parsed, statMap, { mode: opts.mode, online: opts.online, maxMods: opts.maxMods, statusAny: opts.realm === "cn" });
+      const query = buildSearchQuery(parsed, statMap, { deviationPct: opts.deviationPct, online: opts.online, maxMods: opts.maxMods, statusAny: opts.realm === "cn" });
       const search = await this.client.search(opts.league, query);
       const result: BatchItemResult = {
         kind: "item",
         key: parsed.uniqueId ?? entry.slot.rawText,
+        ids: [entry.slot.id],
         category: categorizeItem(parsed),
         name: parsed.name ?? parsed.baseType ?? "(未命名)",
         baseType: parsed.baseType,

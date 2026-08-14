@@ -29,7 +29,7 @@ describe("buildSearchQuery", () => {
 Inpulsa's Broken Heart
 Sadist Garb
 Item Level: 71`);
-    const q = buildSearchQuery(item, statMap, { mode: "loose" });
+    const q = buildSearchQuery(item, statMap, {});
     const query = q.query as Record<string, any>;
     assert.equal(query.name.option, "Inpulsa's Broken Heart");
     assert.equal(query.type.option, "Sadist Garb");
@@ -40,7 +40,7 @@ Item Level: 71`);
 
   it("稀有装 loose：explicit + craft 词缀，数值取 min", () => {
     const item = parseItemText(ring);
-    const q = buildSearchQuery(item, statMap, { mode: "loose" });
+    const q = buildSearchQuery(item, statMap, {});
     const query = q.query as Record<string, any>;
     assert.equal(query.type.option, "Two-Stone Ring");
     assert.equal(query.filters.type_filters.filters.rarity.option, "rare");
@@ -52,24 +52,28 @@ Item Level: 71`);
     assert.deepEqual(mana.value, { min: 31 });
   });
 
-  it("稀有装 strict：额外包含 implicit", () => {
+  it("稀有装：偏差百分比放宽 min 值", () => {
     const item = parseItemText(ring);
-    const q = buildSearchQuery(item, statMap, { mode: "strict" });
-    const query = q.query as Record<string, any>;
-    const ids = query.stats[0].filters.map((f: any) => f.id);
-    assert.ok(ids.includes("implicit.stat_allres"), "strict 应包含 implicit");
+    // 0% 偏差：min 保持原值
+    const exact = buildSearchQuery(item, statMap, {});
+    const e = (exact.query as Record<string, any>).stats[0].filters.find((f: any) => f.id === "explicit.stat_mana");
+    assert.deepEqual(e.value, { min: 31 });
+    // 10% 偏差：min 按 90% 放宽
+    const dev = buildSearchQuery(item, statMap, { deviationPct: 10 });
+    const d = (dev.query as Record<string, any>).stats[0].filters.find((f: any) => f.id === "explicit.stat_mana");
+    assert.equal(d.value.min, 28); // 31 * 0.9 = 27.9 → round 28
   });
 
   it("maxMods 上限生效", () => {
     const item = parseItemText(ring);
-    const q = buildSearchQuery(item, statMap, { mode: "loose", maxMods: 2 });
+    const q = buildSearchQuery(item, statMap, { maxMods: 2 });
     const query = q.query as Record<string, any>;
     assert.ok(query.stats[0].filters.length <= 2);
   });
 
   it("offline 选项", () => {
     const item = parseItemText(ring);
-    const q = buildSearchQuery(item, statMap, { mode: "loose", online: false });
+    const q = buildSearchQuery(item, statMap, { online: false });
     assert.equal((q.query as Record<string, any>).status.option, "any");
   });
 });

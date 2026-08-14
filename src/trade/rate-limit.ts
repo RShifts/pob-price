@@ -1,13 +1,13 @@
 /**
  * 简单限流器：保证两次放行之间至少间隔 minIntervalMs。
- * 官方市集 API 建议约 1 req/s；本工具保守起见默认 2000ms（2s），
- * 可传参调整（如 --delay 3000）。
+ * 官方市集 API 建议约 1 req/s；本工具保守起见默认 3000ms（3s），
+ * 可传参调整（如 --delay 2000）。
  */
 export class RateLimiter {
   private last = 0;
   private minIntervalMs: number;
 
-  constructor(minIntervalMs = 2000) {
+  constructor(minIntervalMs = 3000) {
     this.minIntervalMs = minIntervalMs;
   }
 

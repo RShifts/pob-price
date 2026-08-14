@@ -41,7 +41,7 @@ Implicits: 0
 +80 to maximum Life`);
 
   it("maxMods=1 时优先保留生命词缀", () => {
-    const q = buildSearchQuery(item, statMap, { mode: "loose", maxMods: 1 });
+    const q = buildSearchQuery(item, statMap, { maxMods: 1 });
     const query = q.query as Record<string, any>;
     assert.equal(query.stats[0].filters[0].id, "explicit.stat_life");
   });

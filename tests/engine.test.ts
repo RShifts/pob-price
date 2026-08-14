@@ -68,7 +68,7 @@ describe("BatchPriceEngine", () => {
     const data = new FakeData();
     const client = new FakeClient();
     const engine = new BatchPriceEngine(data, client, async () => new Map([["chaos", 1]]));
-    const summary = await engine.run(build(), { league: "Allflame", mode: "loose", limit: 3, online: true, maxMods: 8, includeGems: true });
+    const summary = await engine.run(build(), { league: "Allflame", deviationPct: 10, limit: 3, online: true, maxMods: 8, includeGems: true });
     // 2 个唯一入口：1 件装备（去重后）+ 1 颗宝石 → 2 次 search
     assert.equal(client.searches, 2);
     assert.equal(client.fetches, 2);
@@ -97,7 +97,7 @@ describe("BatchPriceEngine", () => {
       if (n === 1) throw new Error("模拟失败");
       return original();
     };
-    const summary = await engine.run(build(), { league: "Allflame", mode: "loose", limit: 3, online: true, maxMods: 8, includeGems: true });
+    const summary = await engine.run(build(), { league: "Allflame", deviationPct: 10, limit: 3, online: true, maxMods: 8, includeGems: true });
     assert.equal(summary.failedCount, 1);
     const failed = summary.results.find((r) => r.error);
     assert.ok(failed, "应有失败项");
@@ -112,7 +112,7 @@ describe("BatchPriceEngine", () => {
     const seen: string[] = [];
     const summary = await engine.run(build(), {
       league: "Allflame",
-      mode: "loose",
+      deviationPct: 10,
       limit: 2,
       online: true,
       maxMods: 8,

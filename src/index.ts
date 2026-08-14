@@ -11,7 +11,7 @@ export { TradeData, DEFAULT_UA, INTERNATIONAL_HOST } from "./trade/data.js";
 export { TradeClient } from "./trade/client.js";
 export { StatMap, normalizeStatText, extractValues } from "./trade/stats.js";
 export { buildSearchQuery, tradeSearchUrl } from "./trade/query.js";
-export type { PriceMode, QueryOptions, TradeQuery } from "./trade/query.js";
+export type { QueryOptions, TradeQuery } from "./trade/query.js";
 export { aggregatePrices, toPriceSamples } from "./trade/price.js";
 export type { PriceSample, PriceSummary } from "./trade/price.js";
 export type { TradeLeague, StatEntry, StatGroup, ItemGroup, SearchResponse, Listing, ListingPrice } from "./trade/types.js";
