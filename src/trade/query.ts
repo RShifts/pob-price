@@ -2,13 +2,15 @@ import type { ParsedItem } from "../item/types.js";
 import { StatMap, extractValues } from "./stats.js";
 
 export interface QueryOptions {
-  online?: boolean;
   maxPrice?: number;
   /** 词缀数量上限（默认 8，防止查询过大） */
   maxMods?: number;
   /** 交易类型（如 auto_buyout=交易一口价/立即购买） */
   saleType?: string;
-  /** 国服必须用 any：国服后端对 status=online 静默返回 0 */
+  /**
+   * 国服必须用 any：国服后端对 status=online 静默返回 0。
+   * 国际服固定 status=any + sale_type=securable（立即购买），不再按在线过滤。
+   */
   statusAny?: boolean;
   /**
    * 匹配偏差百分比（0-50，默认 0）：
@@ -72,9 +74,9 @@ export function buildSearchQuery(item: ParsedItem, statMap: StatMap, opts: Query
   const tradeFilters: Record<string, unknown> = {};
   if (opts.maxPrice != null) tradeFilters.price = { max: opts.maxPrice };
   if (opts.saleType) tradeFilters.sale_type = { option: opts.saleType };
-  const statusOption = opts.statusAny || opts.online === false ? "any" : "online";
+  // status 恒为 any：不按在线过滤（国际服靠 sale_type=securable 保证可立即购买；国服 online 会静默返回 0）
   const query: Record<string, unknown> = {
-    status: { option: statusOption },
+    status: { option: "any" },
     filters: {
       type_filters: { filters: typeFilters },
       trade_filters: { filters: tradeFilters },
@@ -109,10 +111,10 @@ export function buildSearchQuery(item: ParsedItem, statMap: StatMap, opts: Query
 }
 
 /** 技能宝石查询：按宝石名 + 最低等级过滤（quality 官方 API 不支持过滤）。 */
-export function buildGemQuery(name: string, level: number, opts: { online?: boolean; saleType?: string; statusAny?: boolean } = {}): TradeQuery {
+export function buildGemQuery(name: string, level: number, opts: { saleType?: string } = {}): TradeQuery {
   return {
     query: {
-      status: { option: opts.statusAny || opts.online === false ? "any" : "online" },
+      status: { option: "any" },
       type: { option: name },
       filters: {
         type_filters: { filters: {} },

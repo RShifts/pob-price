@@ -31,7 +31,7 @@ pob-price — POB 构建解析与市集查价工具
   pob-price parse <input> [--json] [--raw] [--items]
   pob-price price <input> [--item <id|序号|名称>] [--item-text <物品文本>]
                       [--league <联赛名>] [--mode loose|strict] [--limit <n>]
-                      [--offline] [--json] [--no-cache]
+                      [--json] [--no-cache]
 
 <input> 可以是:
   - POB Code 字符串（长 base64）
@@ -53,7 +53,7 @@ price 选项:
   --cookie "<Cookie>"         国服：登录 Cookie 即可（浏览器登录 poe.game.qq.com/trade 后 F12 复制）
   --refresh-token <token>     （可选）国服 OAuth 刷新令牌（localStorage __POEREFRESH），自动换 access token
   --dpop-token <token>        （可选）国服 access token（localStorage __POESESSION）
-  --offline                   不要求在线
+  （国际服固定只查"立即购买"（securable）挂牌；国服查全部）
   --no-cache                  禁用磁盘缓存
 `;
 
@@ -67,18 +67,18 @@ function renderPriceReport(args: {
   item: ParsedItem;
   league: string;
   mode: string;
-  online: boolean;
+  saleType: string;
   searchId: string;
   url: string;
   total: number;
   limit: number;
   summary: ReturnType<typeof aggregatePrices>;
 }): string {
-  const { item, league, mode, online, searchId, url, total, limit, summary } = args;
+  const { item, league, mode, saleType, searchId, url, total, limit, summary } = args;
   const out: string[] = [];
   out.push("===== 单件查价 =====");
   out.push(`物品: ${displayName(item)} [${item.baseType ?? ""}]（${item.rarity}）`);
-  out.push(`联赛: ${league} | 模式: ${mode} | 在线: ${online ? "是" : "否"} | 搜索id: ${searchId}`);
+  out.push(`联赛: ${league} | 模式: ${mode} | 交易: ${saleType === "securable" ? "立即购买" : "全部"} | 搜索id: ${searchId}`);
   out.push(`集市链接: ${url}`);
   out.push(`匹配 ${total} 件，取前 ${Math.min(limit, summary.sampleCount, total || summary.sampleCount)}：`);
   summary.samples.forEach((s, i) => {
@@ -123,7 +123,6 @@ async function resolveCnAccessToken(values: Record<string, unknown>, cache: Disk
 async function cmdPrice(input: string, values: Record<string, unknown>): Promise<void> {
   const mode = (values.mode as string) ?? "loose";
   const limit = Number(values.limit ?? 5);
-  const online = values.offline !== true;
   const useCache = values["no-cache"] !== true;
   const cache = useCache ? new DiskCache() : null;
 
@@ -162,10 +161,9 @@ async function cmdPrice(input: string, values: Record<string, unknown>): Promise
 
   const query = buildSearchQuery(parsedItem, statMap, {
     deviationPct: Number(values.deviation ?? 10),
-    online,
+    // 国际服固定 sale_type=securable（立即购买）；国服不传（sale_type 会致 0）
+    saleType: realm.id === "cn" ? undefined : "securable",
     maxMods: 8,
-    // 国服：status 必须用 any（online 会静默返回 0）；不传 sale_type（会致 0）
-    statusAny: realm.id === "cn",
   });
   const delayMs = Number(values.delay ?? 2000);
   const rateWaitMs = Number(values["rate-wait"] ?? 30000);
@@ -227,7 +225,7 @@ async function cmdPrice(input: string, values: Record<string, unknown>): Promise
       item: parsedItem,
       league,
       mode,
-      online,
+      saleType: realm.id === "cn" ? "any" : "securable",
       searchId: search.id,
       url,
       total: search.total,
@@ -277,7 +275,6 @@ async function cmdBatch(input: string, values: Record<string, unknown>): Promise
     league,
     deviationPct: deviation,
     limit,
-    online: values.offline !== true,
     maxMods,
     includeGems,
     realm: realm.id,
@@ -386,7 +383,6 @@ async function main(): Promise<void> {
       "cookie-file": { type: "string" },
       "refresh-token": { type: "string" },
       "dpop-token": { type: "string" },
-      offline: { type: "boolean", default: false },
       "no-cache": { type: "boolean", default: false },
       "max-mods": { type: "string" },
       "no-gems": { type: "boolean", default: false },

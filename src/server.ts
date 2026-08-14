@@ -136,7 +136,6 @@ async function runPriceJob(job: PriceJob, body: Record<string, unknown>): Promis
       league,
       deviationPct,
       limit,
-      online: body.online !== false,
       maxMods: 8,
       includeGems,
       onlyIds,

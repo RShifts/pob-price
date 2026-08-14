@@ -92,8 +92,6 @@
       <input type="number" id="limit" value="3" min="1" max="10" style="width:70px">
       <label for="delay">请求间隔（ms，防限流）</label>
       <input type="number" id="delay" value="3000" min="1000" step="500" style="width:90px">
-      <label for="online">仅在线</label>
-      <input type="checkbox" id="online" checked style="width:auto">
     </div>
     <div class="row" style="margin-top:12px">
       <button id="priceIntlBtn" onclick="price('intl')" disabled>🌍 国际服查价</button>
@@ -269,7 +267,6 @@ async function runPrice(server) {
     deviationPct: Number($("deviation").value) || 0,
     limit: Number($("limit").value) || 3,
     delay: Number($("delay").value) || 3000,
-    online: $("online").checked,
     cookie: server === "cn" ? cachedCookie() || undefined : undefined,
     league: { [server]: (server === "intl" ? $("leagueIntl").value : $("leagueCn").value) || undefined },
   };
@@ -372,7 +369,6 @@ async function retryItem(server, itemId) {
     deviationPct: Number($("deviation").value) || 0,
     limit: Number($("limit").value) || 3,
     delay: Number($("delay").value) || 3000,
-    online: $("online").checked,
     cookie: server === "cn" ? cachedCookie() || undefined : undefined,
     league: { [server]: (server === "intl" ? $("leagueIntl").value : $("leagueCn").value) || undefined },
   };

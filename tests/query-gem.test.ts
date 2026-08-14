@@ -10,7 +10,7 @@ describe("buildGemQuery", () => {
     const query = q.query as Record<string, any>;
     assert.equal(query.type.option, "Tornado Shot");
     assert.deepEqual(query.filters.misc_filters.filters.gem_level, { min: 20 });
-    assert.equal(query.status.option, "online");
+    assert.equal(query.status.option, "any");
   });
 
   it("等级 0 时不加过滤", () => {

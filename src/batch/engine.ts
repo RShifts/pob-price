@@ -27,7 +27,8 @@ export interface BatchOptions {
   deviationPct?: number;
   /** 每件取前 n 个挂牌 */
   limit: number;
-  online: boolean;
+  /** 交易类型（如 securable=立即购买）。国际服默认 securable；国服不传（sale_type 会致 0） */
+  saleType?: string;
   /** 词缀过滤上限 */
   maxMods: number;
   /** 是否给技能宝石查价 */
@@ -154,7 +155,7 @@ export class BatchPriceEngine {
     if (entry.kind === "item") {
       const parsed = localizeItem(parseItemText(entry.slot.rawText), opts.realm ?? "intl");
       // 国服：status 必须 any（online 会静默返回 0）；sale_type 会致 0，不传
-      const query = buildSearchQuery(parsed, statMap, { deviationPct: opts.deviationPct, online: opts.online, maxMods: opts.maxMods, statusAny: opts.realm === "cn" });
+      const query = buildSearchQuery(parsed, statMap, { deviationPct: opts.deviationPct, saleType: opts.saleType, maxMods: opts.maxMods, statusAny: opts.realm === "cn" });
       const search = await this.client.search(opts.league, query);
       const statCount = ((query.query as Record<string, unknown>).stats as { filters?: unknown[] }[] | undefined)?.[0]?.filters?.length ?? 0;
       const result: BatchItemResult = {
@@ -184,7 +185,7 @@ export class BatchPriceEngine {
     } else {
       const gem = entry.gem;
       const typeName = localizeGemName(gemTypeName(gem.name, gem.gemId), opts.realm ?? "intl");
-      const query = buildGemQuery(typeName, gem.level, { online: opts.online, statusAny: opts.realm === "cn" });
+      const query = buildGemQuery(typeName, gem.level, { saleType: opts.saleType });
       const search = await this.client.search(opts.league, query);
       const result: BatchItemResult = {
         kind: "gem",
@@ -212,6 +213,8 @@ export class BatchPriceEngine {
 
   async run(build: RawBuild, opts: BatchOptions): Promise<BatchSummary> {
     const started = Date.now();
+    // 国际服固定 sale_type=securable（立即购买）；国服不传（sale_type 会致 0）
+    if (opts.saleType === undefined && opts.realm !== "cn") opts.saleType = "securable";
     const entries = this.buildEntries(build, { includeGems: opts.includeGems, onlyIds: opts.onlyIds });
     const statMap = new StatMap(await this.data.stats());
 

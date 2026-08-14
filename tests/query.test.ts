@@ -33,7 +33,7 @@ Item Level: 71`);
     const query = q.query as Record<string, any>;
     assert.equal(query.name.option, "Inpulsa's Broken Heart");
     assert.equal(query.type.option, "Sadist Garb");
-    assert.equal(query.status.option, "online");
+    assert.equal(query.status.option, "any");
     assert.equal(query.stats, undefined);
     assert.equal(q.sort.price, "asc");
   });
@@ -71,9 +71,18 @@ Item Level: 71`);
     assert.ok(query.stats[0].filters.length <= 2);
   });
 
-  it("offline 选项", () => {
+  it("国际服固定 sale_type=securable（立即购买）", () => {
     const item = parseItemText(ring);
-    const q = buildSearchQuery(item, statMap, { online: false });
-    assert.equal((q.query as Record<string, any>).status.option, "any");
+    const q = buildSearchQuery(item, statMap, { saleType: "securable" });
+    const query = q.query as Record<string, any>;
+    assert.equal(query.status.option, "any");
+    assert.equal(query.filters.trade_filters.filters.sale_type.option, "securable");
+  });
+
+  it("国服不传 sale_type", () => {
+    const item = parseItemText(ring);
+    const q = buildSearchQuery(item, statMap, {});
+    const query = q.query as Record<string, any>;
+    assert.equal(query.filters.trade_filters.filters.sale_type, undefined);
   });
 });
