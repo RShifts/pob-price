@@ -136,6 +136,8 @@ export class BatchPriceEngine {
           if (!g.enabled) continue;
           const name = g.name ?? g.gemId.split("/").pop() ?? "?";
           const sig = name + "@" + g.level + ":" + g.quality;
+          // 支持按宝石 id（"gem:" + sig）单件重试
+          if (onlyIds && !onlyIds.has("gem:" + sig)) continue;
           if (!seenGems.has(sig)) seenGems.set(sig, { name, gemId: g.gemId, level: g.level, quality: g.quality, slot: skill.slot ?? "" });
         }
       }
@@ -145,7 +147,7 @@ export class BatchPriceEngine {
   }
 
   private async priceEntry(
-    entry: { kind: "item"; slot: RawItemSlot; count: number } | { kind: "gem"; gem: GemEntry; count: number },
+    entry: { kind: "item"; slot: RawItemSlot; count: number; sig: string } | { kind: "gem"; gem: GemEntry; count: number; sig: string },
     statMap: StatMap,
     conversion: ReadonlyMap<string, number>,
     opts: BatchOptions,
@@ -190,6 +192,7 @@ export class BatchPriceEngine {
       const result: BatchItemResult = {
         kind: "gem",
         key: gem.name + "@" + gem.level,
+        ids: ["gem:" + entry.sig],
         category: "宝石",
         name: gem.name,
         gemLevel: gem.level,

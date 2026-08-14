@@ -341,7 +341,7 @@ function renderPrice(server, rows, summary) {
   for (const r of merged) {
     const tr = document.createElement("tr");
     if (r.error) tr.className = "err";
-    const retry = (r.error && r.kind === "item" && r.ids && r.ids.length)
+    const retry = (r.error && r.ids && r.ids.length)
       ? ` <button class="small secondary retry-btn" data-server="${server}" data-id="${esc(r.ids[0])}">重试</button>`
       : "";
     const statBadge = r.statCount ? ' <span class="badge">词缀' + r.statCount + "</span>" : "";
@@ -365,7 +365,7 @@ async function retryItem(server, itemId) {
     input,
     servers: [server],
     onlyIds: [itemId],
-    includeGems: false,
+    includeGems: itemId.startsWith("gem:"),
     deviationPct: Number($("deviation").value) || 0,
     limit: Number($("limit").value) || 3,
     delay: Number($("delay").value) || 3000,
