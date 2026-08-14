@@ -88,6 +88,19 @@ export function buildSearchQuery(item: ParsedItem, statMap: StatMap, opts: Query
   if (item.rarity === "Unique" && item.name) query.name = { option: item.name };
   if (item.baseType) query.type = { option: item.baseType };
 
+  // 武器 / 身体装备：孔数加入查询；6 连额外要求链接数（六连对价格影响极大）
+  const baseLower = (item.baseType ?? "").toLowerCase();
+  const isWeapon = /axe|sword|dagger|claw|mace|staff|wand|bow|sceptre|hammer|rapier|foil|talon|sickle|spear|trident|warhammer|maul|warstaff|sai|hook|harpoon|bayonet|jade hatchet|sharktooth/.test(baseLower);
+  const isBodyArmour = /garb|regalia|armou?r|plate|mail|jacket|coat|gown|robe|vest|mantle|cuirass|breastplate/.test(baseLower);
+  if ((isWeapon || isBodyArmour) && item.linkCount != null && item.linkCount > 0) {
+    const misc = (query.filters as Record<string, unknown>).misc_filters as Record<string, unknown>;
+    const filters = (misc.filters ?? {}) as Record<string, unknown>;
+    // 官方 misc_filters：sockets=孔数、links=最大相连组孔数
+    filters.sockets = { min: item.socketCount ?? item.linkCount };
+    if (item.linkCount >= 6) filters.links = { min: item.linkCount };
+    misc.filters = filters;
+  }
+
   if (item.rarity !== "Unique" && item.rarity !== "Normal") {
     const candidates: { modText: string; prefer?: string; score: number }[] = [];
     const add = (mods: string[], prefer?: string) => {

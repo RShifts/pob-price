@@ -87,6 +87,29 @@ Item Level: 71`);
     assert.equal(query.filters.trade_filters.filters.sale_type.option, "securable");
   });
 
+  it("武器/身体 6 连：misc 加 sockets + links", () => {
+    const item = parseItemText(`Rarity: RARE\nAssassin Garb\nItem Level: 86\nSockets: R-R-G-G-B-B\n+31 to maximum Mana`);
+    const q = buildSearchQuery(item, statMap, {});
+    const misc = (q.query as Record<string, any>).filters.misc_filters.filters;
+    assert.deepEqual(misc.sockets, { min: 6 });
+    assert.deepEqual(misc.links, { min: 6 });
+  });
+
+  it("非 6 连武器：只加 sockets，不加 links", () => {
+    const item = parseItemText(`Rarity: RARE\nQuartz Sceptre\nItem Level: 80\nSockets: G-R-B\n+31 to maximum Mana`);
+    const q = buildSearchQuery(item, statMap, {});
+    const misc = (q.query as Record<string, any>).filters.misc_filters.filters;
+    assert.deepEqual(misc.sockets, { min: 3 });
+    assert.equal(misc.links, undefined);
+  });
+
+  it("非身体/武器（戒指）：不加孔位过滤", () => {
+    const item = parseItemText(`Rarity: RARE\nTwo-Stone Ring\nItem Level: 83\n+31 to maximum Mana`);
+    const q = buildSearchQuery(item, statMap, {});
+    const misc = (q.query as Record<string, any>).filters.misc_filters.filters;
+    assert.deepEqual(misc, {});
+  });
+
   it("国服不传 sale_type", () => {
     const item = parseItemText(ring);
     const q = buildSearchQuery(item, statMap, {});

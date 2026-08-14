@@ -96,6 +96,8 @@ export function parseItemText(rawText: string): ParsedItem {
     else if (/^Sockets:\s*(.+)$/i.test(line)) {
       item.sockets = line.replace(/^Sockets:\s*/i, "").trim();
       item.socketCount = (item.sockets.match(/[RGBW]/gi) ?? []).length;
+      // POB 空格分隔不相连的组（如 "R-G-B B-B-B"）；链接数 = 最大组孔数
+      item.linkCount = Math.max(0, ...item.sockets.split(/\s+/).map((g) => (g.match(/[RGBW]/gi) ?? []).length));
     } else if (/^Implicits:\s*(\d+)/i.test(line)) {
       item.implicitsCount = parseInt(line.match(/\d+/)?.[0] ?? "0", 10);
     } else if (/^Unique ID:\s*(\S+)/i.test(line)) {

@@ -21,6 +21,8 @@ export interface ParsedItem {
   quality?: number;
   sockets?: string;
   socketCount?: number;
+  /** 最大相连组孔数（6 连 = 6）；POB 用空格分隔不相连的组 */
+  linkCount?: number;
   uniqueId?: string;
   corrupted: boolean;
   mirrored: boolean;
