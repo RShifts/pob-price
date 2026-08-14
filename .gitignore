@@ -13,3 +13,5 @@ cn_cookie*
 .npm-cache/
 *.csv
 *.lua
+
+*.ndjson
